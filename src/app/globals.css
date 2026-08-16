@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FBF7EE;
+  --foreground: #1A1A17;
+
+  /* Madrasa CI palette, extracted from the Claude Design prototypes */
+  --color-ink: #1A1A17;
+  --color-ink-soft: #4A4638;
+  --color-ink-muted: #6E6857;
+  --color-ink-faint: #8A8272;
+
+  --color-paper: #FBF7EE;
+  --color-paper-sunk: #EFE8DA;
+  --color-card: #FFFFFF;
+  --color-card-alt: #F7F2E7;
+  --color-border: #E1D8C5;
+  --color-border-soft: #E4DCC9;
+  --color-border-input: #DCD3C0;
+
+  --color-green-deep: #14402D;
+  --color-green: #1F6B4A;
+  --color-green-dark: #17513A;
+  --color-green-tint: #E6F0E9;
+  --color-green-muted: #8FAE9D;
+
+  --color-gold: #E4B95C;
+  --color-terracotta: #A6522A;
+  --color-terracotta-tint: #F7E7DD;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-faint: var(--color-ink-faint);
+
+  --color-paper: var(--color-paper);
+  --color-paper-sunk: var(--color-paper-sunk);
+  --color-card: var(--color-card);
+  --color-card-alt: var(--color-card-alt);
+  --color-border: var(--color-border);
+  --color-border-soft: var(--color-border-soft);
+  --color-border-input: var(--color-border-input);
+
+  --color-green-deep: var(--color-green-deep);
+  --color-green: var(--color-green);
+  --color-green-dark: var(--color-green-dark);
+  --color-green-tint: var(--color-green-tint);
+  --color-green-muted: var(--color-green-muted);
+
+  --color-gold: var(--color-gold);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-tint: var(--color-terracotta-tint);
+
+  --font-serif: var(--font-lora);
+  --font-arabic: var(--font-naskh);
+  --font-sans: var(--font-body);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
