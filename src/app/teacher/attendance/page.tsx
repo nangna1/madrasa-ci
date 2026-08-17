@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
 import { getStudents } from "@/lib/data/students";
 import { getAttendanceForDate, todayISO } from "@/lib/data/attendance";
+import { getMyClass } from "@/lib/data/classes";
 import AttendanceList from "./attendance-list";
 
 export default async function AttendancePage() {
@@ -10,7 +11,10 @@ export default async function AttendancePage() {
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
 
-  const students = await getStudents(supabase, profile.school_id);
+  const myClass = await getMyClass(supabase);
+  if (!myClass) redirect("/login");
+
+  const students = await getStudents(supabase, myClass.id);
   const date = todayISO();
   const attendance = await getAttendanceForDate(supabase, students.map((s) => s.id), date);
 

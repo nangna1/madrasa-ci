@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
 import { getStudents } from "@/lib/data/students";
 import { getPaymentsForPeriod, currentPeriod, MONTHLY_FEE } from "@/lib/data/payments";
+import { getMyClass } from "@/lib/data/classes";
 import PaymentsView from "./payments-view";
 
 export default async function PaymentsPage({
@@ -15,7 +16,10 @@ export default async function PaymentsPage({
   if (!profile?.school_id) redirect("/login");
   const { student: collectStudentId } = await searchParams;
 
-  const students = await getStudents(supabase, profile.school_id);
+  const myClass = await getMyClass(supabase);
+  if (!myClass) redirect("/login");
+
+  const students = await getStudents(supabase, myClass.id);
   const period = currentPeriod();
   const payments = await getPaymentsForPeriod(supabase, students.map((s) => s.id), period);
 

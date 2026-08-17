@@ -6,13 +6,20 @@ import { getStudents, initials } from "@/lib/data/students";
 import { getAttendanceForDate, todayISO } from "@/lib/data/attendance";
 import { getPaymentsForPeriod, currentPeriod, formatFcfa, MONTHLY_FEE } from "@/lib/data/payments";
 import { getProgressCounts, TOTAL_SOURATES } from "@/lib/data/memorization";
+import { getMyClass, getScheduleSlots, formatHeure, jourIsoAujourdhui } from "@/lib/data/classes";
 
 export default async function TeacherHomePage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
 
-  const students = await getStudents(supabase, profile.school_id);
+  const myClass = await getMyClass(supabase);
+  if (!myClass) redirect("/login");
+
+  const [students, slots] = await Promise.all([
+    getStudents(supabase, myClass.id),
+    getScheduleSlots(supabase, myClass.id),
+  ]);
   const studentIds = students.map((s) => s.id);
   const date = todayISO();
   const period = currentPeriod();
@@ -67,12 +74,34 @@ export default async function TeacherHomePage() {
     year: "numeric",
   });
 
+  const jourAujourdhui = jourIsoAujourdhui();
+  const creneauxAujourdhui = slots.filter((s) => s.jour === jourAujourdhui);
+
   return (
     <div className="flex flex-col gap-[18px]">
       <div className="flex flex-col gap-0.5">
         <div className="font-serif text-2xl font-semibold text-ink">Aujourd&apos;hui</div>
         <div className="text-[13px] text-ink-muted capitalize">{today}</div>
       </div>
+
+      <Link
+        href="/teacher/emploi-du-temps"
+        className="flex items-center justify-between gap-3 rounded-xl border border-border-soft bg-card px-3.5 py-3"
+      >
+        <div className="flex flex-col gap-0.5">
+          <div className="text-xs uppercase tracking-[0.1em] text-ink-faint">{myClass.name}</div>
+          {creneauxAujourdhui.length > 0 ? (
+            <div className="text-sm font-semibold text-ink">
+              {creneauxAujourdhui
+                .map((s) => `${formatHeure(s.heure_debut)} – ${formatHeure(s.heure_fin)}`)
+                .join(" · ")}
+            </div>
+          ) : (
+            <div className="text-sm text-ink-muted">Pas de cours aujourd&apos;hui</div>
+          )}
+        </div>
+        <span className="text-lg text-[#B7AE99]">›</span>
+      </Link>
 
       <div className="grid grid-cols-2 gap-3">
         <StatCard label="Élèves" value={String(total)} />

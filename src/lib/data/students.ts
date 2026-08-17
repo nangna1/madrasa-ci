@@ -5,12 +5,12 @@ export type Student = Database["public"]["Tables"]["students"]["Row"];
 
 export async function getStudents(
   supabase: SupabaseClient<Database>,
-  schoolId: string,
+  classId: string,
 ): Promise<Student[]> {
   const { data, error } = await supabase
     .from("students")
     .select("*")
-    .eq("school_id", schoolId)
+    .eq("class_id", classId)
     .order("full_name", { ascending: true });
 
   if (error) throw error;

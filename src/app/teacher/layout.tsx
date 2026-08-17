@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
 import { getSchool } from "@/lib/data/schools";
+import { getMyClass } from "@/lib/data/classes";
 import TeacherShell from "./teacher-shell";
+import NoClassAssigned from "./no-class-assigned";
 
 export const metadata: Metadata = {
   manifest: "/manifest.json",
@@ -22,8 +24,11 @@ export default async function TeacherLayout({ children }: { children: React.Reac
   const school = await getSchool(supabase, profile.school_id);
   if (!school) redirect("/login");
 
+  const myClass = await getMyClass(supabase);
+  if (!myClass) return <NoClassAssigned schoolName={school.name} />;
+
   return (
-    <TeacherShell schoolName={school.name} teacherName={profile.full_name}>
+    <TeacherShell schoolName={school.name} classeName={myClass.name} teacherName={profile.full_name}>
       {children}
     </TeacherShell>
   );

@@ -62,14 +62,46 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["profiles"]["Row"]>;
         Relationships: [];
       };
+      classes: {
+        Row: {
+          id: string;
+          school_id: string;
+          name: string;
+          teacher_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["classes"]["Row"]> & {
+          school_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["classes"]["Row"]>;
+        Relationships: [];
+      };
+      class_schedule_slots: {
+        Row: {
+          id: string;
+          class_id: string;
+          jour: number;
+          heure_debut: string;
+          heure_fin: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["class_schedule_slots"]["Row"]> & {
+          class_id: string;
+          jour: number;
+          heure_debut: string;
+          heure_fin: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["class_schedule_slots"]["Row"]>;
+        Relationships: [];
+      };
       students: {
         Row: {
           id: string;
           school_id: string;
+          class_id: string | null;
           full_name: string;
           name_ar: string | null;
           age: number | null;
-          classe: string | null;
           parent_name: string | null;
           parent_phone: string | null;
           created_at: string;

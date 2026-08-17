@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
 import { getStudents } from "@/lib/data/students";
 import { MESSAGE_TEMPLATES } from "@/lib/data/messages";
+import { getMyClass } from "@/lib/data/classes";
 import ParentsView from "./parents-view";
 
 export default async function ParentsPage({
@@ -14,7 +15,10 @@ export default async function ParentsPage({
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
 
-  const students = await getStudents(supabase, profile.school_id);
+  const myClass = await getMyClass(supabase);
+  if (!myClass) redirect("/login");
+
+  const students = await getStudents(supabase, myClass.id);
   const { template, student } = await searchParams;
 
   const initialTemplateIndex =

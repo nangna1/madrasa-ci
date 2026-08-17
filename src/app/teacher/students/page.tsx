@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/data/profile";
 import { getStudents } from "@/lib/data/students";
 import { getPaymentsForPeriod, currentPeriod } from "@/lib/data/payments";
 import { getProgressCounts, TOTAL_SOURATES } from "@/lib/data/memorization";
+import { getMyClass } from "@/lib/data/classes";
 import StudentsList from "./students-list";
 
 export default async function StudentsPage() {
@@ -11,7 +12,10 @@ export default async function StudentsPage() {
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
 
-  const students = await getStudents(supabase, profile.school_id);
+  const myClass = await getMyClass(supabase);
+  if (!myClass) redirect("/login");
+
+  const students = await getStudents(supabase, myClass.id);
   const studentIds = students.map((s) => s.id);
   const [payments, progressCounts] = await Promise.all([
     getPaymentsForPeriod(supabase, studentIds, currentPeriod()),
@@ -22,7 +26,7 @@ export default async function StudentsPage() {
     id: s.id,
     fullName: s.full_name,
     nameAr: s.name_ar ?? "",
-    meta: `${s.classe ?? "—"} · ${s.age ?? "?"} ans · parent ${s.parent_name ?? "—"}`,
+    meta: `${myClass.name} · ${s.age ?? "?"} ans · parent ${s.parent_name ?? "—"}`,
     paid: payments.get(s.id)?.status === "paid",
     progress: progressCounts.get(s.id) ?? 0,
   }));

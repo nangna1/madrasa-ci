@@ -16,17 +16,19 @@ const TABS = [
 
 export default function TeacherShell({
   schoolName,
+  classeName,
   teacherName,
   children,
 }: {
   schoolName: string;
+  classeName: string;
   teacherName: string;
   children: React.ReactNode;
 }) {
   return (
     <OfflineProvider>
       <ServiceWorkerRegister />
-      <TeacherShellInner schoolName={schoolName} teacherName={teacherName}>
+      <TeacherShellInner schoolName={schoolName} classeName={classeName} teacherName={teacherName}>
         {children}
       </TeacherShellInner>
     </OfflineProvider>
@@ -35,10 +37,12 @@ export default function TeacherShell({
 
 function TeacherShellInner({
   schoolName,
+  classeName,
   teacherName,
   children,
 }: {
   schoolName: string;
+  classeName: string;
   teacherName: string;
   children: React.ReactNode;
 }) {
@@ -51,7 +55,9 @@ function TeacherShellInner({
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col gap-0.5">
             <div className="font-serif text-[19px] font-semibold">{schoolName}</div>
-            <div className="text-xs text-white/70">{teacherName}</div>
+            <div className="text-xs text-white/70">
+              {classeName} · {teacherName}
+            </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <div className="flex items-center gap-1.5 rounded-full border border-white/30 px-2.5 py-1 text-[11px]">
