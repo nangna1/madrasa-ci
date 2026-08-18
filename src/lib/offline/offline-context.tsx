@@ -20,7 +20,12 @@ const Ctx = createContext<OfflineState | null>(null);
 
 export function OfflineProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [online, setOnline] = useState(() => (typeof navigator === "undefined" ? true : navigator.onLine));
+  // Toujours `true` au premier rendu (serveur et client) : lire
+  // `navigator.onLine` dès l'initialisation ferait diverger le HTML rendu
+  // côté client de celui du serveur dès que le navigateur se croit
+  // hors-ligne au chargement, ce qui casse l'hydratation React. La vraie
+  // valeur est appliquée juste après le montage, dans l'effet ci-dessous.
+  const [online, setOnline] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const flushing = useRef(false);
@@ -63,7 +68,13 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     getQueue().then((q) => {
-      if (!cancelled) setPendingCount(q.length);
+      if (cancelled) return;
+      setPendingCount(q.length);
+      // Corrige le statut réel juste après le montage (post-hydratation) —
+      // voir le commentaire sur l'initialisation de `online` ci-dessus.
+      // Appelé depuis ce callback .then (donc hors du corps synchrone de
+      // l'effet) pour rester conforme à la règle react-hooks/set-state-in-effect.
+      setOnline(navigator.onLine);
     });
 
     const handleOnline = () => {
