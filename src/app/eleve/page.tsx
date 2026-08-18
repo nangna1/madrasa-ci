@@ -52,9 +52,7 @@ export default async function EleveHomePage() {
         <div className="text-[13px] text-ink-muted">{classRow?.data?.name ?? "Classe non assignée"}</div>
       </div>
 
-      {student.class_id && (
-        <LiveReadingView classId={student.class_id} sourates={sourates} initialReading={liveReading} />
-      )}
+      {student.class_id && <LiveReadingView classId={student.class_id} initialReading={liveReading} />}
 
       <div className="flex flex-col gap-2.5 rounded-[14px] bg-green p-4 text-card-alt">
         <div className="text-xs uppercase tracking-[0.1em] text-white/70">Mémorisation du Coran</div>

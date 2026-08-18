@@ -1,33 +1,22 @@
--- Madrasa CI — texte du Coran + lecture en direct
+-- Madrasa CI — lecture/cours en direct
 --
--- Deux ajouts liés :
---   1. `ayat` : le texte arabe complet du Coran, verset par verset
---      (référentiel public, comme `sourates` — voir supabase/ayat_seed.sql
---      pour les 6236 lignes, généré depuis une source fiable, à exécuter
---      juste après cette migration).
---   2. `class_live_reading` : la position de lecture actuelle d'une classe
---      (quelle sourate, quel verset), mise à jour par l'enseignant depuis
---      "Cours en direct" et diffusée en temps réel (Supabase Realtime) à
---      tous les comptes élève de la classe — écran partagé en salle ou
---      téléphone individuel, la classe suit le même texte affiché en même
---      temps que le maître le lit.
+-- Diffusion en temps réel du contenu que l'enseignant est en train
+-- d'exploiter en classe (texte libre : verset, extrait de fiqh, leçon
+-- d'arabe...) à tous les comptes élève de la classe, via Supabase
+-- Realtime — écran/tablette partagé en salle et/ou téléphone individuel.
+-- L'enseignant tape ou colle son contenu, sans base de données à charger.
+--
+-- `drop ... if exists` : rend ce fichier sûr à rejouer tel quel même si une
+-- version antérieure de cette migration (basée sur un texte coranique
+-- pré-chargé, abandonnée) a déjà été exécutée sur ce projet.
 
-create table public.ayat (
-  sourate_id smallint not null references public.sourates (id),
-  num smallint not null,
-  text_ar text not null,
-  primary key (sourate_id, num)
-);
-
-alter table public.ayat enable row level security;
-create policy "ayat_read" on public.ayat
-  for select using (auth.role() = 'authenticated');
-grant select on public.ayat to authenticated;
+drop table if exists public.ayat cascade;
+drop table if exists public.class_live_reading cascade;
 
 create table public.class_live_reading (
   class_id uuid primary key references public.classes (id) on delete cascade,
-  sourate_id smallint references public.sourates (id),
-  ayah_num smallint,
+  title text,
+  content text,
   updated_at timestamptz not null default now()
 );
 
@@ -50,6 +39,5 @@ create policy "live_reading_federation_read" on public.class_live_reading
 grant select, insert, update, delete on public.class_live_reading to authenticated;
 
 -- Diffusion temps réel : sans ça, les clients ne reçoivent aucune
--- notification de changement, seule la RLS ci-dessus resterait active pour
--- des lectures classiques (polling), pas pour un vrai direct.
+-- notification de changement.
 alter publication supabase_realtime add table public.class_live_reading;

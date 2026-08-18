@@ -73,7 +73,7 @@ export default async function CoursEnDirectPage() {
         </div>
       </div>
 
-      <LiveReadingControl classId={myClass.id} sourates={sourates} initialReading={liveReading} />
+      <LiveReadingControl classId={myClass.id} initialReading={liveReading} />
 
       <CoursEnDirectView students={rows} date={date} />
     </div>

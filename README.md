@@ -14,9 +14,9 @@ Trois interfaces dans une seule codebase :
 - **Espace élève** (`/eleve`) — lecture seule : progression Coran, présence
   du mois, statut de la mensualité. Compte créé par l'enseignant depuis la
   fiche élève (pas d'auto-inscription) et son code transmis par WhatsApp.
-  Suit aussi la **lecture en direct** de la classe (texte arabe complet,
-  verset en surbrillance) quand l'enseignant en diffuse une depuis "Cours
-  en direct" — même écran utilisable individuellement ou sur une
+  Suit aussi la **lecture en direct** de la classe (texte libre publié par
+  l'enseignant depuis "Cours en direct" — verset, extrait de fiqh, leçon
+  d'arabe...) — même écran utilisable individuellement ou sur une
   tablette/écran partagé en salle.
 - **Dashboard fédération** (`/federation`) — vue d'ensemble du réseau,
   écoles membres, dossier de plaidoyer d'intégration.
@@ -31,8 +31,7 @@ Trois interfaces dans une seule codebase :
    - `supabase/migrations/0004_payment_pending.sql` (statut "en attente" pour le cycle de paiement mobile money)
    - `supabase/migrations/0005_student_accounts.sql` (comptes élève en lecture seule)
    - `supabase/migrations/0006_fix_student_rls_recursion.sql` (correctif d'une récursion RLS introduite par 0005)
-   - `supabase/migrations/0007_live_reading.sql` (texte du Coran + lecture en direct — active aussi Supabase Realtime sur `class_live_reading`)
-   - `supabase/ayat_seed.sql` (les 6236 versets du Coran, texte Uthmani — fichier volumineux ~1,4 Mo, généré depuis [api.alquran.cloud](https://alquran.cloud/api), à exécuter juste après 0007)
+   - `supabase/migrations/0007_live_reading.sql` (lecture en direct, texte libre publié par l'enseignant — active aussi Supabase Realtime sur `class_live_reading`)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme
@@ -89,21 +88,16 @@ le code (même bouton) invalide immédiatement l'ancien.
 
 ## Lecture en direct
 
-Depuis "Cours en direct" (`/teacher/cours-en-direct`), l'enseignant choisit
-une sourate et avance verset par verset (boutons Précédent/Suivant) : la
-position est écrite dans `class_live_reading` et diffusée en temps réel
-(Supabase Realtime, `postgres_changes`) à tous les comptes élève de la
-classe, qui voient le texte arabe complet avec le verset en cours en
-surbrillance sur `/eleve` — sans rien recharger. Pensé pour deux usages à la
-fois : un écran/tablette partagé posé devant la classe (lecture collective,
-comme le prototype le décrit), et/ou chaque élève équipé qui suit sur son
-propre compte. "Arrêter le direct" efface la position (`sourate_id`/
-`ayah_num` à `null`) et masque la section chez les élèves.
-
-Texte source : édition "quran-uthmani" de
-[api.alquran.cloud](https://alquran.cloud/api) (114 sourates, 6236 versets —
-le compte exact du Coran, vérifié à l'import). Table `ayat` en lecture seule
-pour tout compte authentifié, comme `sourates`.
+Depuis "Cours en direct" (`/teacher/cours-en-direct`), l'enseignant tape ou
+colle un titre + un contenu (verset, extrait de fiqh, leçon d'arabe...) et
+clique "Publier en direct" : écrit dans `class_live_reading`, diffusé en
+temps réel (Supabase Realtime, `postgres_changes`) à tous les comptes élève
+de la classe, affiché tel quel sur `/eleve` — sans rien recharger. Texte
+libre plutôt qu'une base de contenu préchargée : fonctionne pour n'importe
+quelle matière, aucun fichier à importer. Pensé pour deux usages à la fois :
+un écran/tablette partagé posé devant la classe, et/ou chaque élève équipé
+qui suit sur son propre compte. "Arrêter le direct" vide le contenu et
+masque la section chez les élèves.
 
 ## Mode hors-ligne (app enseignant)
 

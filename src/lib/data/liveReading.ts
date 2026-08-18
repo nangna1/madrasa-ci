@@ -1,18 +1,7 @@
 import type { SupabaseClient, RealtimeChannel } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 
-export type Ayah = Database["public"]["Tables"]["ayat"]["Row"];
 export type LiveReading = Database["public"]["Tables"]["class_live_reading"]["Row"];
-
-export async function getAyat(supabase: SupabaseClient<Database>, sourateId: number): Promise<Ayah[]> {
-  const { data, error } = await supabase
-    .from("ayat")
-    .select("*")
-    .eq("sourate_id", sourateId)
-    .order("num", { ascending: true });
-  if (error) throw error;
-  return data;
-}
 
 export async function getLiveReading(
   supabase: SupabaseClient<Database>,
@@ -27,22 +16,19 @@ export async function getLiveReading(
   return data;
 }
 
-// Appelé par l'enseignant (Cours en direct) à chaque changement de sourate
-// ou de verset — un upsert simple, diffusé en temps réel aux élèves via
-// Supabase Realtime (voir subscribeLiveReading), pas d'aller-retour
-// nécessaire côté élève.
+// Publié par l'enseignant (Cours en direct) : ce qu'il tape ou colle est
+// diffusé en temps réel à tous les élèves de la classe via Supabase
+// Realtime (voir subscribeLiveReading) — aucune base de contenu à charger,
+// l'enseignant est la seule source.
 export async function setLiveReading(
   supabase: SupabaseClient<Database>,
   classId: string,
-  sourateId: number,
-  ayahNum: number,
+  title: string,
+  content: string,
 ): Promise<void> {
   const { error } = await supabase
     .from("class_live_reading")
-    .upsert(
-      { class_id: classId, sourate_id: sourateId, ayah_num: ayahNum, updated_at: new Date().toISOString() },
-      { onConflict: "class_id" },
-    );
+    .upsert({ class_id: classId, title, content, updated_at: new Date().toISOString() }, { onConflict: "class_id" });
   if (error) throw error;
 }
 
@@ -50,7 +36,7 @@ export async function clearLiveReading(supabase: SupabaseClient<Database>, class
   const { error } = await supabase
     .from("class_live_reading")
     .upsert(
-      { class_id: classId, sourate_id: null, ayah_num: null, updated_at: new Date().toISOString() },
+      { class_id: classId, title: null, content: null, updated_at: new Date().toISOString() },
       { onConflict: "class_id" },
     );
   if (error) throw error;

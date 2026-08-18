@@ -140,42 +140,16 @@ export interface Database {
           },
         ];
       };
-      ayat: {
-        Row: {
-          sourate_id: number;
-          num: number;
-          text_ar: string;
-        };
-        Insert: Database["public"]["Tables"]["ayat"]["Row"];
-        Update: Partial<Database["public"]["Tables"]["ayat"]["Row"]>;
-        Relationships: [
-          {
-            foreignKeyName: "ayat_sourate_id_fkey";
-            columns: ["sourate_id"];
-            isOneToOne: false;
-            referencedRelation: "sourates";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       class_live_reading: {
         Row: {
           class_id: string;
-          sourate_id: number | null;
-          ayah_num: number | null;
+          title: string | null;
+          content: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["class_live_reading"]["Row"]> & { class_id: string };
         Update: Partial<Database["public"]["Tables"]["class_live_reading"]["Row"]>;
-        Relationships: [
-          {
-            foreignKeyName: "class_live_reading_sourate_id_fkey";
-            columns: ["sourate_id"];
-            isOneToOne: false;
-            referencedRelation: "sourates";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       students: {
         Row: {
