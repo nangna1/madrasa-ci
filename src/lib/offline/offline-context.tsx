@@ -67,15 +67,22 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    getQueue().then((q) => {
-      if (cancelled) return;
-      setPendingCount(q.length);
-      // Corrige le statut réel juste après le montage (post-hydratation) —
-      // voir le commentaire sur l'initialisation de `online` ci-dessus.
-      // Appelé depuis ce callback .then (donc hors du corps synchrone de
-      // l'effet) pour rester conforme à la règle react-hooks/set-state-in-effect.
-      setOnline(navigator.onLine);
-    });
+    getQueue()
+      .then((q) => {
+        if (cancelled) return;
+        setPendingCount(q.length);
+        // Corrige le statut réel juste après le montage (post-hydratation) —
+        // voir le commentaire sur l'initialisation de `online` ci-dessus.
+        // Appelé depuis ce callback .then (donc hors du corps synchrone de
+        // l'effet) pour rester conforme à la règle react-hooks/set-state-in-effect.
+        setOnline(navigator.onLine);
+      })
+      .catch(() => {
+        // IndexedDB indisponible dans ce contexte (ex. navigation privée
+        // Firefox) : l'app reste utilisable, juste sans file d'attente
+        // hors-ligne — pas de rejet de promesse non intercepté.
+        if (!cancelled) setOnline(navigator.onLine);
+      });
 
     const handleOnline = () => {
       setOnline(true);
