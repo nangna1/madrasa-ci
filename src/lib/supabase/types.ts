@@ -140,6 +140,21 @@ export interface Database {
           },
         ];
       };
+      class_recordings: {
+        Row: {
+          id: string;
+          class_id: string;
+          storage_path: string;
+          recorded_by_name: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["class_recordings"]["Row"]> & {
+          class_id: string;
+          storage_path: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["class_recordings"]["Row"]>;
+        Relationships: [];
+      };
       class_live_reading: {
         Row: {
           class_id: string;

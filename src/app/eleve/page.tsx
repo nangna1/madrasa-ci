@@ -6,8 +6,10 @@ import { getSourates, getProgressForStudent, TOTAL_SOURATES } from "@/lib/data/m
 import { getMonthAttendanceSummary } from "@/lib/data/attendance";
 import { getPaymentsForPeriod, currentPeriod, formatFcfa } from "@/lib/data/payments";
 import { getLiveReading } from "@/lib/data/liveReading";
+import { getClassRecordings } from "@/lib/data/recordings";
 import LiveReadingView from "./live-reading-view";
 import AudioListen from "./audio-listen";
+import RecordingsList from "@/components/recordings-list";
 
 const BADGE: Record<string, { label: string; bg: string; fg: string }> = {
   ok: { label: "Mémorisé", bg: "var(--color-green-tint)", fg: "var(--color-green)" },
@@ -24,7 +26,7 @@ export default async function EleveHomePage() {
   if (!student) redirect("/login");
 
   const period = currentPeriod();
-  const [sourates, progress, attendanceSummary, payments, classRow, liveReading] = await Promise.all([
+  const [sourates, progress, attendanceSummary, payments, classRow, liveReading, recordings] = await Promise.all([
     getSourates(supabase),
     getProgressForStudent(supabase, profile.student_id),
     getMonthAttendanceSummary(supabase, profile.student_id),
@@ -33,6 +35,7 @@ export default async function EleveHomePage() {
       ? supabase.from("classes").select("name").eq("id", student.class_id).maybeSingle()
       : Promise.resolve({ data: null }),
     student.class_id ? getLiveReading(supabase, student.class_id) : Promise.resolve(null),
+    student.class_id ? getClassRecordings(supabase, student.class_id) : Promise.resolve([]),
   ]);
 
   const memoCount = [...progress.values()].filter((s) => s === "ok").length;
@@ -55,8 +58,13 @@ export default async function EleveHomePage() {
 
       {student.class_id && (
         <>
-          <AudioListen classId={student.class_id} initialActive={liveReading?.audio_active ?? false} />
+          <AudioListen
+            classId={student.class_id}
+            initialActive={liveReading?.audio_active ?? false}
+            studentName={student.full_name}
+          />
           <LiveReadingView classId={student.class_id} initialReading={liveReading} />
+          <RecordingsList recordings={recordings} />
         </>
       )}
 

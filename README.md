@@ -41,6 +41,7 @@ espaces via l'icône "?") explique le fonctionnement de chaque écran.
    - `supabase/migrations/0008_live_audio.sql` (indicateur "audio en cours" — le flux lui-même passe par LiveKit Cloud, voir plus bas)
    - `supabase/migrations/0009_live_attachment.sql` (image/fichier/message vocal joint à la lecture en direct — crée aussi le bucket Storage `live-content`)
    - `supabase/migrations/0010_super_admin.sql` (rôle super_admin — accès réseau, toutes fédérations)
+   - `supabase/migrations/0011_class_recordings.sql` (enregistrements du direct par les élèves)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme

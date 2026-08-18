@@ -7,9 +7,11 @@ import { getStudents, initials } from "@/lib/data/students";
 import { getAttendanceForDate, todayISO } from "@/lib/data/attendance";
 import { getSourates, getProgressRows, nextSourateFor } from "@/lib/data/memorization";
 import { getLiveReading } from "@/lib/data/liveReading";
+import { getClassRecordings } from "@/lib/data/recordings";
 import CoursEnDirectView from "./cours-en-direct-view";
 import LiveReadingControl from "./live-reading-control";
 import AudioBroadcastControl from "./audio-broadcast-control";
+import RecordingsList from "@/components/recordings-list";
 
 export default async function CoursEnDirectPage() {
   const supabase = await createClient();
@@ -27,10 +29,11 @@ export default async function CoursEnDirectPage() {
   const studentIds = students.map((s) => s.id);
   const date = todayISO();
 
-  const [attendance, progressRows, liveReading] = await Promise.all([
+  const [attendance, progressRows, liveReading, recordings] = await Promise.all([
     getAttendanceForDate(supabase, studentIds, date),
     getProgressRows(supabase, studentIds),
     getLiveReading(supabase, myClass.id),
+    getClassRecordings(supabase, myClass.id),
   ]);
 
   const rows = students.map((s) => {
@@ -77,6 +80,8 @@ export default async function CoursEnDirectPage() {
       <AudioBroadcastControl classId={myClass.id} />
 
       <LiveReadingControl classId={myClass.id} initialReading={liveReading} />
+
+      <RecordingsList recordings={recordings} />
 
       <CoursEnDirectView students={rows} date={date} />
     </div>
