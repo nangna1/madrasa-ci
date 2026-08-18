@@ -17,6 +17,35 @@ export async function getStudents(
   return data;
 }
 
+export async function createStudent(
+  supabase: SupabaseClient<Database>,
+  input: {
+    schoolId: string;
+    classId: string;
+    fullName: string;
+    nameAr?: string;
+    age?: number;
+    parentName?: string;
+    parentPhone?: string;
+  },
+): Promise<Student> {
+  const { data, error } = await supabase
+    .from("students")
+    .insert({
+      school_id: input.schoolId,
+      class_id: input.classId,
+      full_name: input.fullName,
+      name_ar: input.nameAr || null,
+      age: input.age ?? null,
+      parent_name: input.parentName || null,
+      parent_phone: input.parentPhone || null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function getStudent(
   supabase: SupabaseClient<Database>,
   id: string,

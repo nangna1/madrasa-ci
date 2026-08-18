@@ -32,6 +32,12 @@ export default async function StudentsPage() {
   }));
 
   return (
-    <StudentsList students={rows} total={students.length} totalSourates={TOTAL_SOURATES} />
+    <StudentsList
+      students={rows}
+      total={students.length}
+      totalSourates={TOTAL_SOURATES}
+      schoolId={profile.school_id}
+      classId={myClass.id}
+    />
   );
 }
