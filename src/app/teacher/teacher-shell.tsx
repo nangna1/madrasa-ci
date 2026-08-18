@@ -67,11 +67,20 @@ function TeacherShellInner({
               />
               <span>{online ? "En ligne" : "Hors ligne"}</span>
             </div>
-            <form action={logout}>
-              <button className="rounded-full border border-white/30 px-3 py-1.5 text-xs hover:bg-white/10">
-                Déconnexion
-              </button>
-            </form>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/guide"
+                className="rounded-full border border-white/30 px-2.5 py-1.5 text-xs hover:bg-white/10"
+                title="Guide d'utilisation"
+              >
+                ?
+              </Link>
+              <form action={logout}>
+                <button className="rounded-full border border-white/30 px-3 py-1.5 text-xs hover:bg-white/10">
+                  Déconnexion
+                </button>
+              </form>
+            </div>
           </div>
         </div>
 

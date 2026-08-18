@@ -8,9 +8,10 @@ import PrintTrigger from "./print-trigger";
 export default async function AdvocacyPrintPage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
-  if (!profile?.federation_id) redirect("/login");
+  if (!profile || (profile.role !== "federation_admin" && profile.role !== "super_admin")) redirect("/login");
+  if (profile.role === "federation_admin" && !profile.federation_id) redirect("/login");
 
-  const federation = await getFederation(supabase, profile.federation_id);
+  const federation = profile.federation_id ? await getFederation(supabase, profile.federation_id) : null;
   const [data, schools] = await Promise.all([getAdvocacyData(supabase), getSchoolRows(supabase)]);
 
   const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -20,7 +21,9 @@ export default async function AdvocacyPrintPage() {
       <PrintTrigger />
       <div className="mb-8 flex items-baseline justify-between border-b border-border pb-4">
         <div>
-          <div className="font-serif text-2xl font-semibold">{federation?.name}</div>
+          <div className="font-serif text-2xl font-semibold">
+            {federation?.name ?? "Réseau Madrasa CI · toutes fédérations"}
+          </div>
           <div className="text-sm text-ink-muted">Dossier de plaidoyer · intégration au système national</div>
         </div>
         <div className="text-sm text-ink-muted">{today}</div>

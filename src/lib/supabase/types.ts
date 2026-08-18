@@ -5,7 +5,7 @@
 // Supabase créé, pour rester synchronisé avec le schéma réel.
 
 export type SchoolStatus = "non_integree" | "en_cours" | "integree";
-export type ProfileRole = "teacher" | "federation_admin" | "student";
+export type ProfileRole = "teacher" | "federation_admin" | "student" | "super_admin";
 export type MemoStatus = "todo" | "wip" | "ok";
 export type PaymentStatus = "paid" | "pending" | "unpaid";
 export type MessageStatus = "draft" | "sent" | "failed";
@@ -272,6 +272,10 @@ export interface Database {
       current_student_class_id: {
         Args: Record<string, never>;
         Returns: string | null;
+      };
+      is_super_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
       };
     };
     Enums: Record<string, never>;

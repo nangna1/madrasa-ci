@@ -20,7 +20,12 @@ Trois interfaces dans une seule codebase :
   écran utilisable individuellement ou sur une tablette/écran partagé en
   salle.
 - **Dashboard fédération** (`/federation`) — vue d'ensemble du réseau,
-  écoles membres, dossier de plaidoyer d'intégration.
+  écoles membres, dossier de plaidoyer d'intégration. Deux niveaux :
+  `federation_admin` (scopé à sa fédération) et `super_admin` (toutes
+  fédérations confondues, même tableau de bord mais sans filtre).
+
+Un **guide d'utilisation** complet (`/guide`, accessible depuis les trois
+espaces via l'icône "?") explique le fonctionnement de chaque écran.
 
 ## 1. Créer le projet Supabase
 
@@ -35,6 +40,7 @@ Trois interfaces dans une seule codebase :
    - `supabase/migrations/0007_live_reading.sql` (lecture en direct, texte libre publié par l'enseignant — active aussi Supabase Realtime sur `class_live_reading`)
    - `supabase/migrations/0008_live_audio.sql` (indicateur "audio en cours" — le flux lui-même passe par LiveKit Cloud, voir plus bas)
    - `supabase/migrations/0009_live_attachment.sql` (image/fichier/message vocal joint à la lecture en direct — crée aussi le bucket Storage `live-content`)
+   - `supabase/migrations/0010_super_admin.sql` (rôle super_admin — accès réseau, toutes fédérations)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme

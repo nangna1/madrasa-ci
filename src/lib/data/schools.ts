@@ -22,6 +22,15 @@ export async function getFederation(
   return data;
 }
 
+// Toutes les écoles du réseau, toutes fédérations confondues — réservé au
+// super_admin (RLS schools_super_admin_read, 0010_super_admin.sql), pas de
+// filtre par federation_id ici.
+export async function getAllSchools(supabase: SupabaseClient<Database>): Promise<School[]> {
+  const { data, error } = await supabase.from("schools").select("*").order("name", { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
 export async function getSchoolsForFederation(
   supabase: SupabaseClient<Database>,
   federationId: string,

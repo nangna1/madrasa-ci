@@ -8,6 +8,7 @@ const NAV = [
   { href: "/federation", label: "Vue d'ensemble", icon: "◈" },
   { href: "/federation/schools", label: "Écoles membres", icon: "◍" },
   { href: "/federation/advocacy", label: "Plaidoyer", icon: "◫" },
+  { href: "/guide", label: "Guide d'utilisation", icon: "?" },
 ];
 
 export default function FederationShell({

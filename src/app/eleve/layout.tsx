@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
@@ -18,11 +19,20 @@ export default async function EleveLayout({ children }: { children: React.ReactN
           <div className="font-serif text-[19px] font-semibold">{profile.full_name}</div>
           <div className="text-xs text-white/70">Espace élève · Madrasa CI</div>
         </div>
-        <form action={logout}>
-          <button className="rounded-full border border-white/30 px-3 py-1.5 text-xs hover:bg-white/10">
-            Déconnexion
-          </button>
-        </form>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/guide"
+            className="rounded-full border border-white/30 px-2.5 py-1.5 text-xs hover:bg-white/10"
+            title="Guide d'utilisation"
+          >
+            ?
+          </Link>
+          <form action={logout}>
+            <button className="rounded-full border border-white/30 px-3 py-1.5 text-xs hover:bg-white/10">
+              Déconnexion
+            </button>
+          </form>
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto px-5 pb-8 pt-5">{children}</main>
