@@ -7,6 +7,7 @@ import { getMonthAttendanceSummary } from "@/lib/data/attendance";
 import { getPaymentsForPeriod, currentPeriod, formatFcfa } from "@/lib/data/payments";
 import { getLiveReading } from "@/lib/data/liveReading";
 import LiveReadingView from "./live-reading-view";
+import AudioListen from "./audio-listen";
 
 const BADGE: Record<string, { label: string; bg: string; fg: string }> = {
   ok: { label: "Mémorisé", bg: "var(--color-green-tint)", fg: "var(--color-green)" },
@@ -52,7 +53,12 @@ export default async function EleveHomePage() {
         <div className="text-[13px] text-ink-muted">{classRow?.data?.name ?? "Classe non assignée"}</div>
       </div>
 
-      {student.class_id && <LiveReadingView classId={student.class_id} initialReading={liveReading} />}
+      {student.class_id && (
+        <>
+          <AudioListen classId={student.class_id} initialActive={liveReading?.audio_active ?? false} />
+          <LiveReadingView classId={student.class_id} initialReading={liveReading} />
+        </>
+      )}
 
       <div className="flex flex-col gap-2.5 rounded-[14px] bg-green p-4 text-card-alt">
         <div className="text-xs uppercase tracking-[0.1em] text-white/70">Mémorisation du Coran</div>

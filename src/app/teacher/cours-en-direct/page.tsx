@@ -9,6 +9,7 @@ import { getSourates, getProgressRows, nextSourateFor } from "@/lib/data/memoriz
 import { getLiveReading } from "@/lib/data/liveReading";
 import CoursEnDirectView from "./cours-en-direct-view";
 import LiveReadingControl from "./live-reading-control";
+import AudioBroadcastControl from "./audio-broadcast-control";
 
 export default async function CoursEnDirectPage() {
   const supabase = await createClient();
@@ -72,6 +73,8 @@ export default async function CoursEnDirectPage() {
             : " · pas de créneau aujourd'hui"}
         </div>
       </div>
+
+      <AudioBroadcastControl classId={myClass.id} />
 
       <LiveReadingControl classId={myClass.id} initialReading={liveReading} />
 

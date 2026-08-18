@@ -145,6 +145,7 @@ export interface Database {
           class_id: string;
           title: string | null;
           content: string | null;
+          audio_active: boolean;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["class_live_reading"]["Row"]> & { class_id: string };

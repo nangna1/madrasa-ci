@@ -32,6 +32,7 @@ Trois interfaces dans une seule codebase :
    - `supabase/migrations/0005_student_accounts.sql` (comptes élève en lecture seule)
    - `supabase/migrations/0006_fix_student_rls_recursion.sql` (correctif d'une récursion RLS introduite par 0005)
    - `supabase/migrations/0007_live_reading.sql` (lecture en direct, texte libre publié par l'enseignant — active aussi Supabase Realtime sur `class_live_reading`)
+   - `supabase/migrations/0008_live_audio.sql` (indicateur "audio en cours" — le flux lui-même passe par LiveKit Cloud, voir plus bas)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme
@@ -98,6 +99,33 @@ quelle matière, aucun fichier à importer. Pensé pour deux usages à la fois :
 un écran/tablette partagé posé devant la classe, et/ou chaque élève équipé
 qui suit sur son propre compte. "Arrêter le direct" vide le contenu et
 masque la section chez les élèves.
+
+## Audio en direct
+
+Sur "Cours en direct", l'enseignant clique "Démarrer l'audio" : son micro
+est publié dans une room [LiveKit Cloud](https://cloud.livekit.io) nommée
+d'après l'ID de la classe. Côté élève, un bandeau "🔊 Audio en direct
+disponible" apparaît (dès que `class_live_reading.audio_active` passe à
+`true`, via le même canal Supabase Realtime que la lecture en direct) avec
+un bouton "Rejoindre" — volontairement pas de lecture automatique, les
+navigateurs bloquent l'audio sans geste explicite de l'utilisateur.
+
+Audio seul (pas de vidéo) pour rester léger en données mobiles. Les jetons
+d'accès sont émis côté serveur (`src/app/actions/live-audio.ts`, clé
+`LIVEKIT_API_SECRET` jamais exposée au navigateur) après vérification que
+l'appelant est bien l'enseignant titulaire (émission) ou un élève de la
+classe (écoute seule, jamais de publication).
+
+**Variables requises** (`.env.local`, [cloud.livekit.io](https://cloud.livekit.io) → *Settings → API keys*) :
+```
+NEXT_PUBLIC_LIVEKIT_URL=wss://votre-projet.livekit.cloud
+LIVEKIT_API_KEY=...
+LIVEKIT_API_SECRET=...
+```
+Le plan gratuit LiveKit Cloud inclut 5 000 minutes WebRTC/mois (aucune carte
+bancaire requise) — largement suffisant pour tester, mais à surveiller pour
+un usage quotidien sur plusieurs classes (une heure de cours avec 15 élèves
+consomme déjà ~960 minutes-participant).
 
 ## Mode hors-ligne (app enseignant)
 

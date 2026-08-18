@@ -42,6 +42,24 @@ export async function clearLiveReading(supabase: SupabaseClient<Database>, class
   if (error) throw error;
 }
 
+// Bascule le drapeau "audio en cours" (voir 0008_live_audio.sql) — c'est
+// tout ce que cette table sait du flux audio lui-même, qui vit dans
+// LiveKit Cloud (voir src/app/actions/live-audio.ts) ; ce booléen ne sert
+// qu'à afficher "🔊 Rejoindre" côté élève sans interroger LiveKit.
+export async function setAudioActive(
+  supabase: SupabaseClient<Database>,
+  classId: string,
+  active: boolean,
+): Promise<void> {
+  const { error } = await supabase
+    .from("class_live_reading")
+    .upsert(
+      { class_id: classId, audio_active: active, updated_at: new Date().toISOString() },
+      { onConflict: "class_id" },
+    );
+  if (error) throw error;
+}
+
 // S'abonne aux changements de lecture en direct d'une classe (élève comme
 // enseignant). Retourne la fonction de désabonnement, à appeler au
 // démontage du composant.
