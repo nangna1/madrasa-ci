@@ -121,14 +121,19 @@ export async function setAudioActive(
 
 // S'abonne aux changements de lecture en direct d'une classe (élève comme
 // enseignant). Retourne la fonction de désabonnement, à appeler au
-// démontage du composant.
+// démontage du composant. Suffixe aléatoire dans le nom du canal : deux
+// composants (LiveReadingView + AudioListen côté élève) s'abonnent
+// indépendamment à la même classe — un nom de canal partagé fait échouer
+// le second abonnement ("cannot add postgres_changes callbacks... after
+// subscribe()"), Supabase Realtime exigeant un topic unique par canal.
 export function subscribeLiveReading(
   supabase: SupabaseClient<Database>,
   classId: string,
   onChange: (reading: LiveReading | null) => void,
 ): () => void {
+  const uniqueSuffix = Math.random().toString(36).slice(2);
   const channel: RealtimeChannel = supabase
-    .channel(`live-reading-${classId}`)
+    .channel(`live-reading-${classId}-${uniqueSuffix}`)
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "class_live_reading", filter: `class_id=eq.${classId}` },
