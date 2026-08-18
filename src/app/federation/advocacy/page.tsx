@@ -1,27 +1,28 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdvocacyData } from "@/lib/data/federation";
+import { getT } from "@/lib/i18n/server";
 import PageHeader from "../page-header";
 import PrintButton from "./print-button";
 
 export default async function AdvocacyPage() {
   const supabase = await createClient();
-  const data = await getAdvocacyData(supabase);
+  const { t } = await getT();
+  const data = await getAdvocacyData(supabase, t);
 
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Plaidoyer"
-        subtitle="Indicateurs consolidés à l'appui de la demande d'intégration au système national"
+        title={t("Plaidoyer")}
+        subtitle={t("Indicateurs consolidés à l'appui de la demande d'intégration au système national")}
       />
       <div className="grid grid-cols-[1.2fr_1fr] items-start gap-[18px] px-[34px] py-[26px]">
         <div className="flex flex-col gap-[18px] rounded-2xl border border-border bg-card p-6">
           <div className="flex flex-col gap-1.5">
             <div className="font-serif text-xl font-semibold text-ink">
-              Dossier de plaidoyer · intégration au système national
+              {t("Dossier de plaidoyer · intégration au système national")}
             </div>
             <div className="text-[13px] leading-relaxed text-ink-muted">
-              Données consolidées sur les écoles membres, prêtes à être transmises au Ministère de
-              l&apos;Éducation Nationale.
+              {t("Données consolidées sur les écoles membres, prêtes à être transmises au Ministère de l'Éducation Nationale.")}
             </div>
           </div>
           <div className="flex flex-col gap-3">
@@ -40,7 +41,7 @@ export default async function AdvocacyPage() {
 
         <div className="flex flex-col gap-[18px]">
           <div className="flex flex-col gap-3.5 rounded-2xl border border-border bg-card p-6">
-            <div className="font-serif text-lg font-semibold text-ink">Couverture du réseau</div>
+            <div className="font-serif text-lg font-semibold text-ink">{t("Couverture du réseau")}</div>
             {data.coverage.map((c) => (
               <div key={c.label} className="flex flex-col gap-1.5">
                 <div className="flex items-baseline justify-between gap-3">

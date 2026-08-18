@@ -93,7 +93,9 @@ export async function getSchoolRows(
   });
 }
 
-export async function getOverview(supabase: SupabaseClient<Database>) {
+type Translate = (text: string, vars?: Record<string, string | number>) => string;
+
+export async function getOverview(supabase: SupabaseClient<Database>, t: Translate) {
   const { schools, students, payments, progress } = await loadScope(supabase);
 
   const totalStudents = students.length;
@@ -119,12 +121,12 @@ export async function getOverview(supabase: SupabaseClient<Database>) {
     }));
 
   const buckets = [
-    { label: "0 sourate", min: 0, max: 0 },
-    { label: "1-9 sourates", min: 1, max: 9 },
-    { label: "10-29 sourates", min: 10, max: 29 },
-    { label: "30-59 sourates", min: 30, max: 59 },
-    { label: "60-89 sourates", min: 60, max: 89 },
-    { label: `90-${TOTAL_SOURATES} sourates`, min: 90, max: TOTAL_SOURATES },
+    { label: t("0 sourate"), min: 0, max: 0 },
+    { label: t("1-9 sourates"), min: 1, max: 9 },
+    { label: t("10-29 sourates"), min: 10, max: 29 },
+    { label: t("30-59 sourates"), min: 30, max: 59 },
+    { label: t("60-89 sourates"), min: 60, max: 89 },
+    { label: t("90-{total} sourates", { total: TOTAL_SOURATES }), min: 90, max: TOTAL_SOURATES },
   ];
   const okCountByStudent = new Map<string, number>();
   for (const row of progress) {
@@ -154,17 +156,20 @@ export async function getOverview(supabase: SupabaseClient<Database>) {
     },
     regions,
     recoveryPct,
-    recoveryDetail: `des mensualités attendues (${paidCount}/${students.length || 0}), encaissées en mobile money`,
+    recoveryDetail: t("des mensualités attendues ({paid}/{total}), encaissées en mobile money", {
+      paid: paidCount,
+      total: students.length || 0,
+    }),
     operatorSplit,
     hifzBars,
     alerts: lowRecoverySchools.map((s) => ({
-      title: `${s.name} (${s.region}) · recouvrement à ${s.recoveryPct}%`,
-      sub: "Relance groupée des parents possible depuis l'école.",
+      title: t("{name} ({region}) · recouvrement à {pct}%", { name: s.name, region: s.region, pct: s.recoveryPct }),
+      sub: t("Relance groupée des parents possible depuis l'école."),
     })),
   };
 }
 
-export async function getAdvocacyData(supabase: SupabaseClient<Database>) {
+export async function getAdvocacyData(supabase: SupabaseClient<Database>, t: Translate) {
   const { schools, students, payments, progress } = await loadScope(supabase);
 
   const studentsWithProgress = new Set(progress.map((p) => p.student_id)).size;
@@ -184,27 +189,31 @@ export async function getAdvocacyData(supabase: SupabaseClient<Database>) {
 
   return {
     rows: [
-      { label: "Écoles membres", value: String(schools.length), source: "Écoles enregistrées Madrasa CI" },
-      { label: "Élèves suivis", value: String(students.length), source: "Effectifs synchronisés" },
+      { label: t("Écoles membres"), value: String(schools.length), source: t("Écoles enregistrées Madrasa CI") },
+      { label: t("Élèves suivis"), value: String(students.length), source: t("Effectifs synchronisés") },
       {
-        label: "Élèves avec dossier de mémorisation",
+        label: t("Élèves avec dossier de mémorisation"),
         value: String(studentsWithProgress),
-        source: "Suivi pédagogique actif",
+        source: t("Suivi pédagogique actif"),
       },
-      { label: "Enseignants recensés", value: String(teacherProfiles?.length ?? 0), source: "Comptes enseignants" },
-      { label: "Mensualités traçables", value: `${paidTotal.toLocaleString("fr-FR")} FCFA`, source: "Mobile money, période en cours" },
+      { label: t("Enseignants recensés"), value: String(teacherProfiles?.length ?? 0), source: t("Comptes enseignants") },
+      {
+        label: t("Mensualités traçables"),
+        value: `${paidTotal.toLocaleString("fr-FR")} FCFA`,
+        source: t("Mobile money, période en cours"),
+      },
     ],
     coverage: [
       {
-        label: "Écoles avec effectifs à jour",
+        label: t("Écoles avec effectifs à jour"),
         pct: schools.length ? Math.round((schoolsWithStudents / schools.length) * 100) : 0,
       },
       {
-        label: "Écoles avec suivi mémorisation actif",
+        label: t("Écoles avec suivi mémorisation actif"),
         pct: schools.length ? Math.round((schoolsWithProgress / schools.length) * 100) : 0,
       },
       {
-        label: "Écoles avec paiements traçables",
+        label: t("Écoles avec paiements traçables"),
         pct: schools.length ? Math.round((schoolsWithPayments / schools.length) * 100) : 0,
       },
     ],

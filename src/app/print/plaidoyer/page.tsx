@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
 import { getFederation } from "@/lib/data/schools";
 import { getAdvocacyData, getSchoolRows } from "@/lib/data/federation";
+import { getT } from "@/lib/i18n/server";
 import PrintTrigger from "./print-trigger";
 
 export default async function AdvocacyPrintPage() {
@@ -10,11 +11,16 @@ export default async function AdvocacyPrintPage() {
   const profile = await getCurrentProfile(supabase);
   if (!profile || (profile.role !== "federation_admin" && profile.role !== "super_admin")) redirect("/login");
   if (profile.role === "federation_admin" && !profile.federation_id) redirect("/login");
+  const { t, locale } = await getT();
 
   const federation = profile.federation_id ? await getFederation(supabase, profile.federation_id) : null;
-  const [data, schools] = await Promise.all([getAdvocacyData(supabase), getSchoolRows(supabase)]);
+  const [data, schools] = await Promise.all([getAdvocacyData(supabase, t), getSchoolRows(supabase)]);
 
-  const today = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const today = new Date().toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="mx-auto max-w-[800px] p-10 font-sans text-ink print:p-0">
@@ -22,9 +28,9 @@ export default async function AdvocacyPrintPage() {
       <div className="mb-8 flex items-baseline justify-between border-b border-border pb-4">
         <div>
           <div className="font-serif text-2xl font-semibold">
-            {federation?.name ?? "Réseau Madrasa CI · toutes fédérations"}
+            {federation?.name ?? t("Réseau Madrasa CI · toutes fédérations")}
           </div>
-          <div className="text-sm text-ink-muted">Dossier de plaidoyer · intégration au système national</div>
+          <div className="text-sm text-ink-muted">{t("Dossier de plaidoyer · intégration au système national")}</div>
         </div>
         <div className="text-sm text-ink-muted">{today}</div>
       </div>
@@ -40,15 +46,15 @@ export default async function AdvocacyPrintPage() {
         </tbody>
       </table>
 
-      <div className="mb-3 font-serif text-lg font-semibold">Écoles membres</div>
+      <div className="mb-3 font-serif text-lg font-semibold">{t("Écoles membres")}</div>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-ink-faint">
-            <th className="py-2 font-normal">École</th>
-            <th className="py-2 font-normal">Région</th>
-            <th className="py-2 font-normal">Élèves</th>
-            <th className="py-2 font-normal">Statut</th>
-            <th className="py-2 font-normal">Recouvrement</th>
+            <th className="py-2 font-normal">{t("École")}</th>
+            <th className="py-2 font-normal">{t("Région")}</th>
+            <th className="py-2 font-normal">{t("Élèves")}</th>
+            <th className="py-2 font-normal">{t("Statut")}</th>
+            <th className="py-2 font-normal">{t("Recouvrement")}</th>
           </tr>
         </thead>
         <tbody>

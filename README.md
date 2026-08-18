@@ -74,6 +74,34 @@ puis vers `/teacher` ou `/federation` selon le rôle du compte connecté.
 **Important** : sans projet Supabase configuré (étapes 1-2), l'app ne rend rien —
 l'authentification est vérifiée sur chaque requête (`src/proxy.ts`), y compris `/login`.
 
+## Application bilingue (français / arabe)
+
+Les trois espaces (enseignant, élève, fédération) et la page de connexion
+sont bilingues. Un bouton de bascule (`LanguageToggle`, visible dans chaque
+en-tête) permet de changer de langue à tout moment, sans lien avec le
+compte — ce n'est pas un choix fait à la création du compte, chacun peut
+basculer librement à chaque session.
+
+Fonctionnement :
+
+- `src/lib/i18n/dictionary.ts` + `src/lib/i18n/ar.ts` : un dictionnaire
+  façon gettext où le texte français affiché sert lui-même de clé vers sa
+  traduction arabe. Un texte absent du dictionnaire s'affiche simplement en
+  français — l'app ne casse jamais en mode arabe, elle a juste des trous de
+  traduction ponctuels si un texte a été oublié.
+- La langue choisie est stockée dans un cookie (`madrasa_locale`, pas de
+  routage par préfixe d'URL type `/ar/...`). `src/lib/i18n/server.ts`
+  (`getT()`) lit ce cookie côté serveur ; `src/components/locale-provider.tsx`
+  (`useLocale()`) l'expose côté client.
+- En arabe, `src/app/layout.tsx` bascule tout le document en
+  `dir="rtl"`/`lang="ar"` et en police Noto Naskh Arabic (`font-arabic`) ;
+  quelques éléments qui doivent rester en LTR même en arabe (codes élève,
+  numéros de reçu) sont explicitement forcés avec `dir="ltr"`.
+- Un guide d'utilisation complet est disponible dans l'app (`/guide`,
+  accessible depuis chaque en-tête), lui aussi bilingue. Deux documents
+  autonomes (français et arabe) existent également en dehors de l'app —
+  demandez les liens si besoin.
+
 ## Comptes élève
 
 Depuis la fiche élève (`/teacher/students/[id]`), l'enseignant clique
