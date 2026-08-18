@@ -36,10 +36,69 @@ export async function clearLiveReading(supabase: SupabaseClient<Database>, class
   const { error } = await supabase
     .from("class_live_reading")
     .upsert(
-      { class_id: classId, title: null, content: null, updated_at: new Date().toISOString() },
+      {
+        class_id: classId,
+        title: null,
+        content: null,
+        attachment_path: null,
+        attachment_name: null,
+        attachment_type: null,
+        updated_at: new Date().toISOString(),
+      },
       { onConflict: "class_id" },
     );
   if (error) throw error;
+}
+
+const ATTACHMENT_BUCKET = "live-content";
+
+// Dépose le fichier dans le bucket Storage (chemin préfixé par l'ID de
+// classe — c'est ce préfixe que les policies RLS de storage.objects
+// vérifient pour n'autoriser que l'enseignant titulaire à écrire ici) puis
+// publie sa référence, diffusée comme le reste de la lecture en direct.
+export async function uploadLiveAttachment(
+  supabase: SupabaseClient<Database>,
+  classId: string,
+  file: File,
+): Promise<{ path: string; name: string; type: string }> {
+  const path = `${classId}/${Date.now()}-${file.name}`;
+  const { error: uploadError } = await supabase.storage.from(ATTACHMENT_BUCKET).upload(path, file);
+  if (uploadError) throw uploadError;
+
+  const { error } = await supabase.from("class_live_reading").upsert(
+    {
+      class_id: classId,
+      attachment_path: path,
+      attachment_name: file.name,
+      attachment_type: file.type,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "class_id" },
+  );
+  if (error) throw error;
+
+  return { path, name: file.name, type: file.type };
+}
+
+export async function removeLiveAttachment(
+  supabase: SupabaseClient<Database>,
+  classId: string,
+  previousPath: string | null,
+): Promise<void> {
+  const { error } = await supabase.from("class_live_reading").upsert(
+    { class_id: classId, attachment_path: null, attachment_name: null, attachment_type: null, updated_at: new Date().toISOString() },
+    { onConflict: "class_id" },
+  );
+  if (error) throw error;
+  if (previousPath) {
+    // Best-effort : le fichier orphelin dans Storage n'empêche rien de
+    // fonctionner, on ne bloque pas l'action de l'enseignant sur ça.
+    await supabase.storage.from(ATTACHMENT_BUCKET).remove([previousPath]).catch(() => {});
+  }
+}
+
+export function getLiveAttachmentUrl(supabase: SupabaseClient<Database>, path: string): string {
+  return supabase.storage.from(ATTACHMENT_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
 // Bascule le drapeau "audio en cours" (voir 0008_live_audio.sql) — c'est

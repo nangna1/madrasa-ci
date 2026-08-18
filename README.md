@@ -14,10 +14,11 @@ Trois interfaces dans une seule codebase :
 - **Espace élève** (`/eleve`) — lecture seule : progression Coran, présence
   du mois, statut de la mensualité. Compte créé par l'enseignant depuis la
   fiche élève (pas d'auto-inscription) et son code transmis par WhatsApp.
-  Suit aussi la **lecture en direct** de la classe (texte libre publié par
-  l'enseignant depuis "Cours en direct" — verset, extrait de fiqh, leçon
-  d'arabe...) — même écran utilisable individuellement ou sur une
-  tablette/écran partagé en salle.
+  Suit aussi la **lecture en direct** de la classe (texte libre, image,
+  fichier ou message vocal publiés par l'enseignant depuis "Cours en
+  direct") et peut **rejoindre l'audio en direct** de l'enseignant — même
+  écran utilisable individuellement ou sur une tablette/écran partagé en
+  salle.
 - **Dashboard fédération** (`/federation`) — vue d'ensemble du réseau,
   écoles membres, dossier de plaidoyer d'intégration.
 
@@ -33,6 +34,7 @@ Trois interfaces dans une seule codebase :
    - `supabase/migrations/0006_fix_student_rls_recursion.sql` (correctif d'une récursion RLS introduite par 0005)
    - `supabase/migrations/0007_live_reading.sql` (lecture en direct, texte libre publié par l'enseignant — active aussi Supabase Realtime sur `class_live_reading`)
    - `supabase/migrations/0008_live_audio.sql` (indicateur "audio en cours" — le flux lui-même passe par LiveKit Cloud, voir plus bas)
+   - `supabase/migrations/0009_live_attachment.sql` (image/fichier/message vocal joint à la lecture en direct — crée aussi le bucket Storage `live-content`)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme
@@ -126,6 +128,19 @@ Le plan gratuit LiveKit Cloud inclut 5 000 minutes WebRTC/mois (aucune carte
 bancaire requise) — largement suffisant pour tester, mais à surveiller pour
 un usage quotidien sur plusieurs classes (une heure de cours avec 15 élèves
 consomme déjà ~960 minutes-participant).
+
+## Pièce jointe (image, fichier, message vocal)
+
+Sur "Cours en direct", l'enseignant peut joindre une image, un fichier
+quelconque, ou enregistrer un message vocal au micro (bouton "🎙️ Message
+vocal" — utilise l'API `MediaRecorder` du navigateur, aucun logiciel
+externe) en plus ou à la place du texte. Stocké dans un bucket Supabase
+Storage public nommé `live-content` (chemin `<class_id>/...`, dépôt
+restreint par RLS à l'enseignant titulaire de la classe — voir
+`0009_live_attachment.sql`), référencé dans `class_live_reading` et diffusé
+par le même canal Realtime que le reste. Côté élève : une image s'affiche
+directement, un message vocal se lit avec un lecteur audio intégré, un
+autre type de fichier propose un lien de téléchargement.
 
 ## Mode hors-ligne (app enseignant)
 

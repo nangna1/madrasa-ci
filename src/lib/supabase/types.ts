@@ -146,6 +146,9 @@ export interface Database {
           title: string | null;
           content: string | null;
           audio_active: boolean;
+          attachment_path: string | null;
+          attachment_name: string | null;
+          attachment_type: string | null;
           updated_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["class_live_reading"]["Row"]> & { class_id: string };
