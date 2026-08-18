@@ -20,9 +20,13 @@ export interface PaymentProvider {
 /**
  * TODO(intégration paiement réelle) : implémenter un provider par
  * opérateur (API Orange Money CI, MTN MoMo, Wave for Business) une fois les
- * comptes marchands créés. En attendant, cette implémentation journalise
- * la demande sans contacter d'API — l'encaissement est confirmé
- * manuellement côté UI par le maître, comme le fait le prototype.
+ * comptes marchands créés — c'est le seul endroit à changer, appelé depuis
+ * requestMobileMoneyPayment() (src/lib/data/payments.ts). En attendant,
+ * cette implémentation journalise la demande sans contacter d'API : le
+ * paiement passe quand même en base au statut 'pending' (voir
+ * payments.ts), et c'est l'enseignant qui confirme manuellement une fois
+ * l'argent reçu — exactement ce qu'un vrai webhook opérateur ferait à sa
+ * place plus tard, sans rien changer côté UI.
  */
 export const consolePaymentProvider: PaymentProvider = {
   async requestPayment(req) {

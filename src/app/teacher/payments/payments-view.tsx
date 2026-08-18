@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { recordPayment, formatFcfa } from "@/lib/data/payments";
+import { requestMobileMoneyPayment, confirmPayment, formatFcfa } from "@/lib/data/payments";
+import { consolePaymentProvider, type MobileMoneyOperator } from "@/lib/providers/payment-provider";
 import { sendParentMessage } from "@/lib/data/messages";
 import { useOffline } from "@/lib/offline/offline-context";
 import { Toast, useToast } from "@/components/toast";
@@ -16,7 +17,7 @@ interface Row {
   payment: { status: string; method: string | null; receiptNo: string | null } | null;
 }
 
-const OPERATORS: { name: string; color: string }[] = [
+const OPERATORS: { name: MobileMoneyOperator; color: string }[] = [
   { name: "Orange Money", color: "#E07A1F" },
   { name: "MTN Money", color: "#E4B95C" },
   { name: "Wave", color: "#2C6CD6" },
@@ -36,38 +37,79 @@ export default function PaymentsView({
   initialCollectId?: string;
 }) {
   const router = useRouter();
-  const { runOrQueue } = useOffline();
+  const { online, runOrQueue } = useOffline();
   const { message, flash } = useToast();
   const [rows, setRows] = useState(students);
   const [collectFor, setCollectFor] = useState<Row | null>(
-    () => students.find((s) => s.id === initialCollectId && s.payment?.status !== "paid") ?? null,
+    () =>
+      students.find(
+        (s) => s.id === initialCollectId && s.payment?.status !== "paid" && s.payment?.status !== "pending",
+      ) ?? null,
   );
-  const [operator, setOperator] = useState("Wave");
+  const [operator, setOperator] = useState<MobileMoneyOperator>("Wave");
   const [receipt, setReceipt] = useState<{ studentId: string; no: string; rows: { k: string; v: string }[] } | null>(
     null,
   );
   const [busy, setBusy] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
 
   const paidCount = rows.filter((s) => s.payment?.status === "paid").length;
   const collected = paidCount * fee;
   const expected = rows.length * fee;
   const collectedPct = expected > 0 ? Math.round((collected / expected) * 100) : 0;
 
+  // Étape 1 : envoi de la demande à l'opérateur. Exige le réseau (voir
+  // requestMobileMoneyPayment) — contrairement au reste de l'app, pas de
+  // repli hors ligne possible ici, donc pas de runOrQueue.
   async function confirmCollect() {
-    if (!collectFor) return;
+    if (!collectFor || !online) return;
     const target = collectFor;
+    if (!target.parentPhone) {
+      setRequestError("Aucun numéro de téléphone parent enregistré pour cet élève.");
+      return;
+    }
     setBusy(true);
-    setCollectFor(null);
+    setRequestError(null);
+    try {
+      const supabase = createClient();
+      await requestMobileMoneyPayment(supabase, consolePaymentProvider, {
+        studentId: target.id,
+        period,
+        operator,
+        parentPhone: target.parentPhone,
+        amount: fee,
+      });
+      setRows((prev) =>
+        prev.map((s) =>
+          s.id === target.id ? { ...s, payment: { status: "pending", method: operator, receiptNo: null } } : s,
+        ),
+      );
+      setCollectFor(null);
+      flash(`Demande envoyée au ${operator} de ${target.parentName ?? "parent"}`);
+      router.refresh();
+    } catch (e) {
+      setRequestError(e instanceof Error ? e.message : "Échec de l'envoi de la demande.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Étape 2 : l'enseignant confirme que l'argent est bien arrivé (aujourd'hui
+  // manuel, demain déclenché par le webhook de l'opérateur — même fonction).
+  // Rejouable hors ligne : c'est une écriture de confirmation, pas un envoi
+  // en temps réel vers un opérateur.
+  async function confirmReceived(target: Row) {
+    setBusy(true);
 
     const { synced } = await runOrQueue(
       {
-        kind: "payment",
-        label: `Encaissement · ${target.fullName}`,
-        payload: { studentId: target.id, period, method: operator },
+        kind: "payment_confirm",
+        label: `Confirmation paiement · ${target.fullName}`,
+        payload: { studentId: target.id, period },
       },
       async () => {
         const supabase = createClient();
-        const payment = await recordPayment(supabase, target.id, period, operator);
+        const payment = await confirmPayment(supabase, target.id, period);
         setReceipt({
           studentId: target.id,
           no: payment.receipt_no ?? "",
@@ -75,7 +117,7 @@ export default function PaymentsView({
             { k: "Élève", v: target.fullName },
             { k: "Période", v: period },
             { k: "Montant", v: formatFcfa(fee) },
-            { k: "Moyen", v: operator },
+            { k: "Moyen", v: target.payment?.method ?? "Mobile money" },
             { k: "Date", v: new Date().toLocaleDateString("fr-FR") },
           ],
         });
@@ -89,10 +131,10 @@ export default function PaymentsView({
     } else {
       setRows((prev) =>
         prev.map((s) =>
-          s.id === target.id ? { ...s, payment: { status: "paid", method: operator, receiptNo: null } } : s,
+          s.id === target.id ? { ...s, payment: { ...s.payment!, status: "paid", receiptNo: null } } : s,
         ),
       );
-      flash("Hors ligne · encaissement enregistré, reçu généré à la synchronisation");
+      flash("Hors ligne · confirmation enregistrée, reçu généré à la synchronisation");
     }
   }
 
@@ -166,7 +208,9 @@ export default function PaymentsView({
 
       <div className="flex flex-col gap-2">
         {rows.map((s) => {
-          const paid = s.payment?.status === "paid";
+          const status = s.payment?.status;
+          const paid = status === "paid";
+          const pending = status === "pending";
           const pendingSync = paid && !s.payment?.receiptNo;
           return (
             <div
@@ -176,18 +220,23 @@ export default function PaymentsView({
               <div className="flex flex-1 flex-col gap-0.5">
                 <div className="text-sm font-semibold text-ink">{s.fullName}</div>
                 <div className="text-xs text-ink-muted">
-                  {paid
-                    ? `${pendingSync ? "Payé (à synchroniser)" : "Payé"} · ${s.payment?.method} · ${formatFcfa(fee)}`
-                    : `Dû · ${formatFcfa(fee)} · parent ${s.parentPhone ?? "—"}`}
+                  {paid && `${pendingSync ? "Payé (à synchroniser)" : "Payé"} · ${s.payment?.method} · ${formatFcfa(fee)}`}
+                  {pending && `En attente · demande envoyée sur ${s.payment?.method} · ${formatFcfa(fee)}`}
+                  {!paid && !pending && `Dû · ${formatFcfa(fee)} · parent ${s.parentPhone ?? "—"}`}
                 </div>
               </div>
               <button
-                onClick={() => (paid ? openReceipt(s) : setCollectFor(s))}
-                className={`rounded-lg px-3.5 py-2 text-xs font-semibold ${
-                  paid ? "border border-green text-green" : "bg-green text-card-alt"
+                onClick={() => (paid ? openReceipt(s) : pending ? confirmReceived(s) : setCollectFor(s))}
+                disabled={busy}
+                className={`rounded-lg px-3.5 py-2 text-xs font-semibold disabled:opacity-60 ${
+                  paid
+                    ? "border border-green text-green"
+                    : pending
+                      ? "border border-gold text-gold"
+                      : "bg-green text-card-alt"
                 }`}
               >
-                {paid ? "Reçu" : "Encaisser"}
+                {paid ? "Reçu" : pending ? "Confirmer la réception" : "Encaisser"}
               </button>
             </div>
           );
@@ -224,22 +273,31 @@ export default function PaymentsView({
                   <div className="flex flex-1 flex-col gap-0.5">
                     <span className="text-sm font-semibold text-ink">{o.name}</span>
                     <span className="text-xs text-ink-muted">
-                      {collectFor.parentPhone} · {collectFor.parentName}
+                      {collectFor.parentPhone ?? "Pas de numéro enregistré"} · {collectFor.parentName}
                     </span>
                   </div>
                   {operator === o.name && <span className="text-sm text-green">✓</span>}
                 </button>
               ))}
             </div>
+
+            {!online && (
+              <div className="mt-3 rounded-lg bg-terracotta-tint px-3 py-2.5 text-xs text-terracotta">
+                Connexion requise pour envoyer la demande à l&apos;opérateur — réessayez une fois en ligne.
+              </div>
+            )}
+            {requestError && <div className="mt-3 text-xs text-terracotta">{requestError}</div>}
+
             <button
               onClick={confirmCollect}
-              disabled={busy}
+              disabled={busy || !online}
               className="mt-4 w-full rounded-xl bg-green py-3.5 text-sm font-semibold text-card-alt hover:bg-green-dark disabled:opacity-60"
             >
               {busy ? "Envoi…" : "Demander le paiement"}
             </button>
             <div className="mt-2.5 text-center text-[11.5px] text-ink-faint">
-              Le parent reçoit une demande sur son téléphone. Reçu généré automatiquement.
+              Le parent reçoit une demande sur son téléphone. Une fois l&apos;argent reçu, confirmez dans l&apos;app
+              pour générer le reçu.
             </div>
           </div>
         </div>

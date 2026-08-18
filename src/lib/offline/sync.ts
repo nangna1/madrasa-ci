@@ -3,7 +3,7 @@ import type { Database } from "@/lib/supabase/types";
 import { getQueue, removeFromQueue } from "./queue";
 import { markAttendance } from "@/lib/data/attendance";
 import { setProgress } from "@/lib/data/memorization";
-import { recordPayment } from "@/lib/data/payments";
+import { confirmPayment } from "@/lib/data/payments";
 import { sendParentMessage } from "@/lib/data/messages";
 
 export async function flushQueue(
@@ -32,13 +32,8 @@ export async function flushQueue(
             action.payload.status,
           );
           break;
-        case "payment":
-          await recordPayment(
-            supabase,
-            action.payload.studentId,
-            action.payload.period,
-            action.payload.method,
-          );
+        case "payment_confirm":
+          await confirmPayment(supabase, action.payload.studentId, action.payload.period);
           break;
         case "message":
           await sendParentMessage(supabase, action.payload);

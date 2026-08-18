@@ -20,6 +20,7 @@ Deux interfaces dans une seule codebase :
    - `supabase/migrations/0001_init.sql` (schéma + RLS)
    - `supabase/migrations/0002_classes.sql` (classes, emploi du temps, plusieurs enseignants par école)
    - `supabase/migrations/0003_subjects.sql` (catalogue de matières réelles — coraniques et programme national ivoirien)
+   - `supabase/migrations/0004_payment_pending.sql` (statut "en attente" pour le cycle de paiement mobile money)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme
@@ -54,10 +55,13 @@ l'authentification est vérifiée sur chaque requête (`src/proxy.ts`), y compri
 L'app enseignant est une PWA installable (`public/manifest.json`, scope
 `/teacher`) avec file d'attente réelle :
 
-- Présence, validation de sourate, encaissement et messages WhatsApp
-  fonctionnent hors-ligne : l'action est appliquée localement tout de suite,
-  puis mise en file dans IndexedDB (`src/lib/offline/`) si le réseau est
-  indisponible ou si l'appel Supabase échoue.
+- Présence, validation de sourate, confirmation de paiement et messages
+  WhatsApp fonctionnent hors-ligne : l'action est appliquée localement tout
+  de suite, puis mise en file dans IndexedDB (`src/lib/offline/`) si le
+  réseau est indisponible ou si l'appel Supabase échoue. Seule l'envoi
+  d'une *demande* de paiement mobile money exige d'être en ligne (voir
+  ci-dessous) : contrairement aux autres actions, ce n'est pas une simple
+  écriture qu'il serait utile de rejouer plus tard.
 - L'en-tête affiche l'état réel (`En ligne`/`Hors ligne`, via
   `navigator.onLine` + événements `online`/`offline`) et le nombre d'actions
   en attente, avec synchronisation automatique au retour du réseau ou
@@ -68,17 +72,27 @@ L'app enseignant est une PWA installable (`public/manifest.json`, scope
   moins une fois", pas à un support hors-ligne complet dès la première
   installation.
 - Cas particulier des paiements : générer un numéro de reçu séquentiel
-  nécessite le réseau (`next_receipt_no` côté Supabase). Un encaissement pris
-  hors-ligne affiche donc "Payé (à synchroniser)" sans reçu jusqu'à la
-  synchronisation, plutôt que d'inventer un faux numéro.
+  nécessite le réseau (`next_receipt_no` côté Supabase). Une confirmation de
+  paiement prise hors-ligne affiche donc "Payé (à synchroniser)" sans reçu
+  jusqu'à la synchronisation, plutôt que d'inventer un faux numéro.
 
 ## Ce qui n'est pas encore branché
 
-- **Mobile money (Orange Money, MTN Money, Wave)** : le flux d'encaissement est
-  fonctionnel de bout en bout (UI, enregistrement en base, génération de reçu),
-  mais l'appel réel à l'opérateur est un stub qui journalise en console
-  (`src/lib/providers/payment-provider.ts`). À brancher une fois les comptes
-  marchands obtenus.
+- **Mobile money (Orange Money, MTN Money, Wave)** : le vrai cycle de
+  paiement est en place — demande envoyée (`requestMobileMoneyPayment`,
+  statut `pending`), confirmation qui génère le reçu (`confirmPayment`,
+  statut `paid`), écran distinguant "Dû" / "En attente" / "Payé" — mais
+  l'appel réel à l'opérateur est un stub qui journalise en console
+  (`src/lib/providers/payment-provider.ts`) plutôt que d'envoyer un vrai
+  push USSD, et c'est l'enseignant qui confirme manuellement la réception de
+  l'argent (au lieu d'un webhook opérateur). Une fois les comptes marchands
+  obtenus, deux choses à brancher, sans toucher au reste de l'app :
+  1. remplacer `consolePaymentProvider` par un vrai appel API par opérateur ;
+  2. ajouter une route webhook qui appelle `confirmPayment()` automatiquement
+     à la confirmation de l'opérateur, au lieu du bouton manuel.
+  La demande de paiement exige une connexion (elle est désactivée hors ligne
+  dans l'UI) — contrairement au reste de l'app, ce n'est pas une simple
+  écriture qu'il est utile de rejouer plus tard.
 - **WhatsApp** : même chose pour l'envoi de messages
   (`src/lib/providers/messaging-provider.ts`) — un compte WhatsApp Business API
   (Meta) est nécessaire.

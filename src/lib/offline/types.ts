@@ -17,10 +17,14 @@ export type QueuedAction =
     }
   | {
       id: string;
-      kind: "payment";
+      // La demande de paiement mobile money elle-même exige le réseau (voir
+      // requestMobileMoneyPayment) et n'est donc jamais mise en file — seule
+      // la confirmation qu'un paiement 'pending' a bien été reçu peut être
+      // prise hors ligne puis rejouée.
+      kind: "payment_confirm";
       createdAt: number;
       label: string;
-      payload: { studentId: string; period: string; method: string };
+      payload: { studentId: string; period: string };
     }
   | {
       id: string;
@@ -33,5 +37,5 @@ export type QueuedAction =
 export type NewQueuedAction =
   | Omit<Extract<QueuedAction, { kind: "attendance" }>, "id" | "createdAt">
   | Omit<Extract<QueuedAction, { kind: "memorization" }>, "id" | "createdAt">
-  | Omit<Extract<QueuedAction, { kind: "payment" }>, "id" | "createdAt">
+  | Omit<Extract<QueuedAction, { kind: "payment_confirm" }>, "id" | "createdAt">
   | Omit<Extract<QueuedAction, { kind: "message" }>, "id" | "createdAt">;

@@ -7,7 +7,7 @@
 export type SchoolStatus = "non_integree" | "en_cours" | "integree";
 export type ProfileRole = "teacher" | "federation_admin";
 export type MemoStatus = "todo" | "wip" | "ok";
-export type PaymentStatus = "paid" | "unpaid";
+export type PaymentStatus = "paid" | "pending" | "unpaid";
 export type MessageStatus = "draft" | "sent" | "failed";
 export type SubjectCategory = "coranique" | "national";
 

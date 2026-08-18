@@ -34,9 +34,12 @@ export default async function TeacherHomePage() {
   const present = [...attendance.values()].filter((v) => v === true).length;
   const withoutStatus = students.filter((s) => attendance.get(s.id) === undefined).length;
   const paidCount = [...payments.values()].filter((p) => p.status === "paid").length;
-  const unpaidCount = total - paidCount;
+  const pendingCount = [...payments.values()].filter((p) => p.status === "pending").length;
+  // "Impayé" = ni payé, ni déjà en attente de confirmation mobile money —
+  // une demande en cours n'a pas besoin d'être relancée.
+  const unpaidCount = total - paidCount - pendingCount;
   const collected = paidCount * MONTHLY_FEE;
-  const unpaid = (total - paidCount) * MONTHLY_FEE;
+  const unpaid = unpaidCount * MONTHLY_FEE;
 
   const inProgress = students.filter((s) => {
     const count = progressCounts.get(s.id) ?? 0;
@@ -50,6 +53,13 @@ export default async function TeacherHomePage() {
       tone: "var(--color-terracotta)",
       href: "/teacher/payments",
       show: unpaidCount > 0,
+    },
+    {
+      title: `${pendingCount} paiement${pendingCount > 1 ? "s" : ""} en attente de confirmation`,
+      sub: "Demande envoyée au parent, à confirmer dès réception de l'argent",
+      tone: "var(--color-gold)",
+      href: "/teacher/payments",
+      show: pendingCount > 0,
     },
     {
       title: "Appel du jour non terminé",
