@@ -99,8 +99,10 @@ Fonctionnement :
   numéros de reçu) sont explicitement forcés avec `dir="ltr"`.
 - Un guide d'utilisation complet est disponible dans l'app (`/guide`,
   accessible depuis chaque en-tête), lui aussi bilingue. Deux documents
-  autonomes (français et arabe) existent également en dehors de l'app —
-  demandez les liens si besoin.
+  autonomes (français et arabe) existent également en dehors de l'app, au
+  format PDF, dans [`docs/`](./docs) : [`Guide-Madrasa-CI-FR.pdf`](./docs/Guide-Madrasa-CI-FR.pdf)
+  et [`Guide-Madrasa-CI-AR.pdf`](./docs/Guide-Madrasa-CI-AR.pdf) — mêmes
+  12 sections que le guide intégré, mise en page imprimable.
 
 ## Comptes élève
 
