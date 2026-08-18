@@ -56,12 +56,23 @@ const ATTACHMENT_BUCKET = "live-content";
 // classe — c'est ce préfixe que les policies RLS de storage.objects
 // vérifient pour n'autoriser que l'enseignant titulaire à écrire ici) puis
 // publie sa référence, diffusée comme le reste de la lecture en direct.
+// Supabase Storage rejette les espaces, accents et apostrophes dans une clé
+// d'objet (ex. "Capture d'écran 2026-08-08.png" → "Invalid key") — le nom
+// affiché à l'élève (attachment_name) garde l'original intact, seul le
+// chemin de stockage est nettoyé.
+function sanitizeFilename(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // accents décomposés par NFD (é -> e + ´)
+    .replace(/[^a-zA-Z0-9.-]+/g, "_");
+}
+
 export async function uploadLiveAttachment(
   supabase: SupabaseClient<Database>,
   classId: string,
   file: File,
 ): Promise<{ path: string; name: string; type: string }> {
-  const path = `${classId}/${Date.now()}-${file.name}`;
+  const path = `${classId}/${Date.now()}-${sanitizeFilename(file.name)}`;
   const { error: uploadError } = await supabase.storage.from(ATTACHMENT_BUCKET).upload(path, file);
   if (uploadError) throw uploadError;
 
