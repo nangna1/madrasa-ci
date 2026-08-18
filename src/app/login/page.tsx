@@ -4,11 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { studentEmailFor } from "@/lib/auth/student-code";
+import { useLocale } from "@/components/locale-provider";
+import { LanguageToggle } from "@/components/language-toggle";
 
 type Mode = "adulte" | "eleve";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLocale();
   const [mode, setMode] = useState<Mode>("adulte");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +31,7 @@ export default function LoginPage() {
         : await supabase.auth.signInWithPassword({ email: studentEmailFor(code), password: code.trim().toUpperCase() });
 
     if (error) {
-      setError(mode === "adulte" ? "Identifiants incorrects." : "Code incorrect.");
+      setError(mode === "adulte" ? t("Identifiants incorrects.") : t("Code incorrect."));
       setLoading(false);
       return;
     }
@@ -38,11 +41,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper-sunk px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-paper-sunk px-4">
+      <LanguageToggle className="absolute top-5 end-5 rounded-full border border-border-input bg-card px-3 py-1.5 text-xs font-semibold text-ink-muted hover:text-ink" />
+
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-[0_24px_60px_rgba(38,30,16,0.12)]">
         <div className="mb-6 flex flex-col items-center gap-1 text-center">
           <div className="font-serif text-2xl font-semibold text-ink">Madrasa CI</div>
-          <div className="text-xs uppercase tracking-[0.14em] text-ink-faint">Connexion</div>
+          <div className="text-xs uppercase tracking-[0.14em] text-ink-faint">{t("Connexion")}</div>
         </div>
 
         <div className="mb-6 flex rounded-lg border border-border-input bg-white p-1">
@@ -53,7 +58,7 @@ export default function LoginPage() {
               mode === "adulte" ? "bg-green text-card-alt" : "text-ink-muted"
             }`}
           >
-            Enseignant / Fédération
+            {t("Enseignant / Fédération")}
           </button>
           <button
             type="button"
@@ -62,7 +67,7 @@ export default function LoginPage() {
               mode === "eleve" ? "bg-green text-card-alt" : "text-ink-muted"
             }`}
           >
-            Élève
+            {t("Élève")}
           </button>
         </div>
 
@@ -71,7 +76,7 @@ export default function LoginPage() {
             <>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-ink-muted" htmlFor="email">
-                  E-mail
+                  {t("E-mail")}
                 </label>
                 <input
                   id="email"
@@ -84,7 +89,7 @@ export default function LoginPage() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-medium text-ink-muted" htmlFor="password">
-                  Mot de passe
+                  {t("Mot de passe")}
                 </label>
                 <input
                   id="password"
@@ -99,21 +104,20 @@ export default function LoginPage() {
           ) : (
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-ink-muted" htmlFor="code">
-                Code d&apos;accès
+                {t("Code d'accès")}
               </label>
               <input
                 id="code"
                 type="text"
                 required
                 autoCapitalize="characters"
-                placeholder="Ex. 7F3K9QRT"
+                placeholder={t("Ex. 7F3K9QRT")}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
+                dir="ltr"
                 className="rounded-lg border border-border-input bg-white px-3 py-3 text-center font-serif text-lg tracking-[0.15em] text-ink outline-none focus:border-green"
               />
-              <div className="text-center text-[11px] text-ink-faint">
-                Le code donné par le maître, reçu sur WhatsApp
-              </div>
+              <div className="text-center text-[11px] text-ink-faint">{t("Le code donné par le maître, reçu sur WhatsApp")}</div>
             </div>
           )}
 
@@ -124,7 +128,7 @@ export default function LoginPage() {
             disabled={loading}
             className="mt-2 rounded-lg bg-green px-4 py-3 text-sm font-semibold text-card-alt hover:bg-green-dark disabled:opacity-60"
           >
-            {loading ? "Connexion…" : "Se connecter"}
+            {loading ? t("Connexion…") : t("Se connecter")}
           </button>
         </form>
       </div>

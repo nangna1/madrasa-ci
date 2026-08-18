@@ -7,11 +7,13 @@ import { getAttendanceForDate, todayISO } from "@/lib/data/attendance";
 import { getPaymentsForPeriod, currentPeriod, formatFcfa, MONTHLY_FEE } from "@/lib/data/payments";
 import { getProgressCounts, TOTAL_SOURATES } from "@/lib/data/memorization";
 import { getMyClass, getScheduleSlots, formatHeure, jourIsoAujourdhui } from "@/lib/data/classes";
+import { getT } from "@/lib/i18n/server";
 
 export default async function TeacherHomePage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
+  const { t, locale } = await getT();
 
   const myClass = await getMyClass(supabase);
   if (!myClass) redirect("/login");
@@ -48,28 +50,28 @@ export default async function TeacherHomePage() {
 
   const todos = [
     {
-      title: `${unpaidCount} mensualité${unpaidCount > 1 ? "s" : ""} impayée${unpaidCount > 1 ? "s" : ""}`,
-      sub: "Relancer par WhatsApp ou encaisser en mobile money",
+      title: `${unpaidCount} ${t(unpaidCount > 1 ? "mensualités impayées" : "mensualité impayée")}`,
+      sub: t("Relancer par WhatsApp ou encaisser en mobile money"),
       tone: "var(--color-terracotta)",
       href: "/teacher/payments",
       show: unpaidCount > 0,
     },
     {
-      title: `${pendingCount} paiement${pendingCount > 1 ? "s" : ""} en attente de confirmation`,
-      sub: "Demande envoyée au parent, à confirmer dès réception de l'argent",
+      title: `${pendingCount} ${t(pendingCount > 1 ? "paiements en attente de confirmation" : "paiement en attente de confirmation")}`,
+      sub: t("Demande envoyée au parent, à confirmer dès réception de l'argent"),
       tone: "var(--color-gold)",
       href: "/teacher/payments",
       show: pendingCount > 0,
     },
     {
-      title: "Appel du jour non terminé",
-      sub: `${withoutStatus} élève(s) sans statut`,
+      title: t("Appel du jour non terminé"),
+      sub: `${withoutStatus} ${t(withoutStatus > 1 ? "élèves sans statut" : "élève sans statut")}`,
       tone: "var(--color-gold)",
       href: "/teacher/attendance",
       show: withoutStatus > 0,
     },
     {
-      title: `${inProgress.length} élève(s) en cours de mémorisation`,
+      title: `${inProgress.length} ${t(inProgress.length > 1 ? "élèves en cours de mémorisation" : "élève en cours de mémorisation")}`,
       sub: inProgress.slice(0, 3).map((s) => s.full_name.split(" ")[0]).join(", ") || undefined,
       tone: "var(--color-green)",
       href: "/teacher/students",
@@ -77,7 +79,7 @@ export default async function TeacherHomePage() {
     },
   ].filter((t) => t.show);
 
-  const today = new Date().toLocaleDateString("fr-FR", {
+  const today = new Date().toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -90,7 +92,7 @@ export default async function TeacherHomePage() {
   return (
     <div className="flex flex-col gap-[18px]">
       <div className="flex flex-col gap-0.5">
-        <div className="font-serif text-2xl font-semibold text-ink">Aujourd&apos;hui</div>
+        <div className="font-serif text-2xl font-semibold text-ink">{t("Aujourd'hui")}</div>
         <div className="text-[13px] text-ink-muted capitalize">{today}</div>
       </div>
 
@@ -100,8 +102,8 @@ export default async function TeacherHomePage() {
       >
         <div className="flex flex-col gap-0.5">
           <div className="text-xs uppercase tracking-[0.1em] text-white/70">{myClass.name}</div>
-          <div className="text-sm font-semibold">▶ Cours en direct</div>
-          <div className="text-xs text-white/70">Présence et mémorisation, élève par élève</div>
+          <div className="text-sm font-semibold">{t("▶ Cours en direct")}</div>
+          <div className="text-xs text-white/70">{t("Présence et mémorisation, élève par élève")}</div>
         </div>
         <span className="text-lg text-white/70">›</span>
       </Link>
@@ -119,32 +121,32 @@ export default async function TeacherHomePage() {
                 .join(" · ")}
             </div>
           ) : (
-            <div className="text-sm text-ink-muted">Pas de cours aujourd&apos;hui</div>
+            <div className="text-sm text-ink-muted">{t("Pas de cours aujourd'hui")}</div>
           )}
         </div>
         <span className="text-lg text-[#B7AE99]">›</span>
       </Link>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="Élèves" value={String(total)} />
-        <StatCard label="Présents" value={String(present)} tone="text-green" />
-        <StatCard label="Encaissé ce mois" value={formatFcfa(collected)} small />
-        <StatCard label="Impayés" value={formatFcfa(unpaid)} small tone="text-terracotta" />
+        <StatCard label={t("Élèves")} value={String(total)} />
+        <StatCard label={t("Présents")} value={String(present)} tone="text-green" />
+        <StatCard label={t("Encaissé ce mois")} value={formatFcfa(collected)} small />
+        <StatCard label={t("Impayés")} value={formatFcfa(unpaid)} small tone="text-terracotta" />
       </div>
 
       {todos.length > 0 && (
         <div className="flex flex-col gap-2.5">
-          <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">À faire</div>
-          {todos.map((t) => (
+          <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">{t("À faire")}</div>
+          {todos.map((td) => (
             <Link
-              key={t.title}
-              href={t.href}
+              key={td.title}
+              href={td.href}
               className="flex items-center justify-between gap-3 rounded-xl border border-border-soft bg-card px-3.5 py-3.5 hover:border-[#C9BFA6]"
-              style={{ borderLeft: `3px solid ${t.tone}` }}
+              style={{ borderInlineStart: `3px solid ${td.tone}` }}
             >
               <div className="flex flex-col gap-0.5">
-                <div className="text-sm font-semibold text-ink">{t.title}</div>
-                {t.sub && <div className="text-xs text-ink-muted">{t.sub}</div>}
+                <div className="text-sm font-semibold text-ink">{td.title}</div>
+                {td.sub && <div className="text-xs text-ink-muted">{td.sub}</div>}
               </div>
               <span className="text-lg text-[#B7AE99]">›</span>
             </Link>
@@ -153,7 +155,7 @@ export default async function TeacherHomePage() {
       )}
 
       <div className="flex flex-col gap-2.5">
-        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">Progression de la classe</div>
+        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">{t("Progression de la classe")}</div>
         {students.slice(0, 4).map((s) => {
           const count = progressCounts.get(s.id) ?? 0;
           const pct = Math.round((count / TOTAL_SOURATES) * 100);
@@ -166,7 +168,7 @@ export default async function TeacherHomePage() {
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-sm text-ink">{s.full_name}</span>
                   <span className="text-xs text-ink-muted">
-                    {count}/{TOTAL_SOURATES} sourates
+                    {count}/{TOTAL_SOURATES} {t("sourates")}
                   </span>
                 </div>
                 <div className="h-[5px] overflow-hidden rounded-full bg-[#E8E0CD]">

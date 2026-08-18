@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
 import { OfflineProvider, useOffline } from "@/lib/offline/offline-context";
+import { useLocale } from "@/components/locale-provider";
+import { LanguageToggle } from "@/components/language-toggle";
 import ServiceWorkerRegister from "./service-worker-register";
 
 const TABS = [
@@ -48,6 +50,7 @@ function TeacherShellInner({
 }) {
   const pathname = usePathname();
   const { online, pendingCount, syncing, flush } = useOffline();
+  const { t } = useLocale();
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-paper">
@@ -65,19 +68,20 @@ function TeacherShellInner({
                 className="h-[7px] w-[7px] rounded-full"
                 style={{ background: online ? "#8ED6A8" : "var(--color-gold)" }}
               />
-              <span>{online ? "En ligne" : "Hors ligne"}</span>
+              <span>{online ? t("En ligne") : t("Hors ligne")}</span>
             </div>
             <div className="flex items-center gap-2">
+              <LanguageToggle className="rounded-full border border-white/30 px-2.5 py-1.5 text-xs hover:bg-white/10" />
               <Link
                 href="/guide"
                 className="rounded-full border border-white/30 px-2.5 py-1.5 text-xs hover:bg-white/10"
-                title="Guide d'utilisation"
+                title={t("Guide d'utilisation")}
               >
                 ?
               </Link>
               <form action={logout}>
                 <button className="rounded-full border border-white/30 px-3 py-1.5 text-xs hover:bg-white/10">
-                  Déconnexion
+                  {t("Déconnexion")}
                 </button>
               </form>
             </div>
@@ -87,10 +91,10 @@ function TeacherShellInner({
         {pendingCount > 0 && (
           <div className="flex items-center justify-between gap-2.5 rounded-[10px] bg-black/[0.18] px-3 py-2.5 text-xs text-[#E7DFCB]">
             <span>
-              {pendingCount} action{pendingCount > 1 ? "s" : ""} en attente d&apos;envoi
+              {pendingCount} {pendingCount > 1 ? t("actions") : t("action")} {t("en attente d'envoi")}
             </span>
             <button onClick={flush} disabled={syncing || !online} className="underline disabled:opacity-50">
-              {syncing ? "Synchronisation…" : "Synchroniser"}
+              {syncing ? t("Synchronisation…") : t("Synchroniser")}
             </button>
           </div>
         )}
@@ -110,7 +114,7 @@ function TeacherShellInner({
               }`}
             >
               <span className="text-[15px]">{tab.icon}</span>
-              <span className="text-[10.5px] font-semibold tracking-wide">{tab.label}</span>
+              <span className="text-[10.5px] font-semibold tracking-wide">{t(tab.label)}</span>
             </Link>
           );
         })}

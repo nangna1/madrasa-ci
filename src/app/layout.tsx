@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Noto_Naskh_Arabic } from "next/font/google";
+import { LocaleProvider } from "@/components/locale-provider";
+import { getLocale } from "@/lib/i18n/server";
 import "./globals.css";
 
 const lora = Lora({
@@ -19,14 +21,18 @@ export const metadata: Metadata = {
   description: "Gestion des écoles coraniques et médersas de Côte d'Ivoire",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
   return (
     <html
-      lang="fr"
+      lang={locale}
+      dir={locale === "ar" ? "rtl" : "ltr"}
       className={`${lora.variable} ${notoNaskhArabic.variable} h-full antialiased`}
       style={{ ["--font-body" as string]: "Helvetica Neue, Helvetica, Arial, sans-serif" }}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className={`min-h-full flex flex-col ${locale === "ar" ? "font-arabic" : "font-sans"}`}>
+        <LocaleProvider initialLocale={locale}>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }

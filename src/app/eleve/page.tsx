@@ -7,6 +7,7 @@ import { getMonthAttendanceSummary } from "@/lib/data/attendance";
 import { getPaymentsForPeriod, currentPeriod, formatFcfa } from "@/lib/data/payments";
 import { getLiveReading } from "@/lib/data/liveReading";
 import { getClassRecordings } from "@/lib/data/recordings";
+import { getT } from "@/lib/i18n/server";
 import LiveReadingView from "./live-reading-view";
 import AudioListen from "./audio-listen";
 import RecordingsList from "@/components/recordings-list";
@@ -21,6 +22,7 @@ export default async function EleveHomePage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (!profile?.student_id) redirect("/login");
+  const { t } = await getT();
 
   const student = await getStudent(supabase, profile.student_id);
   if (!student) redirect("/login");
@@ -53,7 +55,7 @@ export default async function EleveHomePage() {
             {student.name_ar}
           </div>
         )}
-        <div className="text-[13px] text-ink-muted">{classRow?.data?.name ?? "Classe non assignée"}</div>
+        <div className="text-[13px] text-ink-muted">{classRow?.data?.name ?? t("Classe non assignée")}</div>
       </div>
 
       {student.class_id && (
@@ -69,7 +71,7 @@ export default async function EleveHomePage() {
       )}
 
       <div className="flex flex-col gap-2.5 rounded-[14px] bg-green p-4 text-card-alt">
-        <div className="text-xs uppercase tracking-[0.1em] text-white/70">Mémorisation du Coran</div>
+        <div className="text-xs uppercase tracking-[0.1em] text-white/70">{t("Mémorisation du Coran")}</div>
         <div className="font-serif text-[30px] font-semibold">
           {memoCount}/{TOTAL_SOURATES}
         </div>
@@ -80,26 +82,28 @@ export default async function EleveHomePage() {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-[14px] border border-border-soft bg-card p-3.5">
-          <div className="text-[11px] uppercase tracking-[0.1em] text-ink-faint">Présence ce mois</div>
+          <div className="text-[11px] uppercase tracking-[0.1em] text-ink-faint">{t("Présence ce mois")}</div>
           <div className="mt-1 font-serif text-[22px] font-semibold text-ink">
             {attendanceSummary.present}/{attendanceSummary.recorded || "—"}
           </div>
         </div>
         <div className="rounded-[14px] border border-border-soft bg-card p-3.5">
-          <div className="text-[11px] uppercase tracking-[0.1em] text-ink-faint">Mensualité {period}</div>
+          <div className="text-[11px] uppercase tracking-[0.1em] text-ink-faint">
+            {t("Mensualité {period}", { period })}
+          </div>
           <div
             className={`mt-1 font-serif text-[18px] font-semibold ${
               paid ? "text-green" : pending ? "text-gold" : "text-terracotta"
             }`}
           >
-            {paid ? "Payée" : pending ? "En attente" : "Non payée"}
+            {paid ? t("Payée") : pending ? t("En attente") : t("Non payée")}
           </div>
           {payment && <div className="text-[11px] text-ink-faint">{formatFcfa(payment.amount)}</div>}
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">Sourates</div>
+        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">{t("Sourates")}</div>
         {sourates.map((s) => {
           const status = progress.get(s.id) ?? "todo";
           const badge = BADGE[status];
@@ -120,7 +124,7 @@ export default async function EleveHomePage() {
                 className="rounded-full px-2.5 py-1.5 text-[11px] font-semibold"
                 style={{ background: badge.bg, color: badge.fg }}
               >
-                {badge.label}
+                {t(badge.label)}
               </span>
             </div>
           );

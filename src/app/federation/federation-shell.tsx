@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
+import { useLocale } from "@/components/locale-provider";
+import { LanguageToggle } from "@/components/language-toggle";
 
 const NAV = [
   { href: "/federation", label: "Vue d'ensemble", icon: "◈" },
@@ -21,6 +23,7 @@ export default function FederationShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { t } = useLocale();
 
   return (
     <div className="flex min-h-screen bg-paper-sunk">
@@ -28,7 +31,7 @@ export default function FederationShell({
         <div className="flex flex-col gap-1">
           <div className="font-serif text-lg font-semibold text-[#FBF7EE]">{orgName}</div>
           <div className="text-[11.5px] leading-relaxed text-[#90AC9D]">
-            Tableau de bord agrégé · réseau d&apos;écoles membres
+            {t("Tableau de bord agrégé · réseau d'écoles membres")}
           </div>
         </div>
 
@@ -44,25 +47,24 @@ export default function FederationShell({
                 }`}
               >
                 <span className="text-[13px] opacity-85">{n.icon}</span>
-                <span>{n.label}</span>
+                <span>{t(n.label)}</span>
               </Link>
             );
           })}
         </nav>
 
         <div className="mt-auto flex flex-col gap-3">
+          <LanguageToggle className="w-full rounded-[9px] border border-white/[0.35] py-2 text-xs font-semibold hover:bg-white/[0.08]" />
           <div className="flex flex-col gap-1.5 border-t border-white/[0.16] pt-4">
-            <div className="text-[11px] uppercase tracking-[0.12em] text-[#7E9A8B]">
-              Plaidoyer intégration
-            </div>
+            <div className="text-[11px] uppercase tracking-[0.12em] text-[#7E9A8B]">{t("Plaidoyer intégration")}</div>
             <div className="font-serif text-2xl font-semibold text-[#FBF7EE]">{integrationRate}%</div>
             <div className="text-[11.5px] leading-relaxed text-[#90AC9D]">
-              des écoles du réseau intégrées au système national
+              {t("des écoles du réseau intégrées au système national")}
             </div>
           </div>
           <form action={logout}>
             <button className="w-full rounded-[9px] border border-white/[0.35] py-2.5 text-xs font-semibold hover:bg-white/[0.08]">
-              Déconnexion
+              {t("Déconnexion")}
             </button>
           </form>
         </div>

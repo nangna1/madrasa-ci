@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { markAttendance } from "@/lib/data/attendance";
 import { useOffline } from "@/lib/offline/offline-context";
+import { useLocale } from "@/components/locale-provider";
 import { Toast, useToast } from "@/components/toast";
 
 interface Row {
@@ -18,6 +19,7 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
   const router = useRouter();
   const { runOrQueue } = useOffline();
   const { message, flash } = useToast();
+  const { t } = useLocale();
   const [local, setLocal] = useState(students);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -33,7 +35,7 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
     const { synced } = await runOrQueue(
       {
         kind: "attendance",
-        label: `Présence · ${student?.fullName ?? ""}`,
+        label: `${t("Présence")} · ${student?.fullName ?? ""}`,
         payload: { studentId: id, date, present: value },
       },
       async () => {
@@ -45,8 +47,8 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
     setBusyId(null);
     flash(
       synced
-        ? `${value ? "Présence" : "Absence"} enregistrée · ${student?.fullName ?? ""}`
-        : "Hors ligne · action enregistrée, envoi à la synchronisation",
+        ? `${value ? t("Présence") : t("Absence")} ${t("enregistrée")} · ${student?.fullName ?? ""}`
+        : t("Hors ligne · action enregistrée, envoi à la synchronisation"),
     );
     if (synced) router.refresh();
   }
@@ -54,9 +56,9 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-0.5">
-        <div className="font-serif text-2xl font-semibold text-ink">Appel du jour</div>
+        <div className="font-serif text-2xl font-semibold text-ink">{t("Appel du jour")}</div>
         <div className="text-[13px] text-ink-muted">
-          {present} présents · {absent} absents · {unset} non renseignés
+          {t("{n} présents · {a} absents · {u} non renseignés", { n: present, a: absent, u: unset })}
         </div>
       </div>
 
@@ -76,7 +78,7 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
                   : "border-border-input bg-card text-ink-muted"
               }`}
             >
-              Présent
+              {t("Présent")}
             </button>
             <button
               onClick={() => set(s.id, false)}
@@ -87,7 +89,7 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
                   : "border-border-input bg-card text-ink-muted"
               }`}
             >
-              Absent
+              {t("Absent")}
             </button>
           </div>
         ))}
@@ -98,7 +100,7 @@ export default function AttendanceList({ students, date }: { students: Row[]; da
           href="/teacher/parents?template=absence"
           className="rounded-xl bg-green px-4 py-3.5 text-center text-sm font-semibold text-card-alt hover:bg-green-dark"
         >
-          Prévenir les parents des absents
+          {t("Prévenir les parents des absents")}
         </a>
       )}
 

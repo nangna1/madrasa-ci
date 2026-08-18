@@ -7,6 +7,7 @@ import { requestMobileMoneyPayment, confirmPayment, formatFcfa } from "@/lib/dat
 import { consolePaymentProvider, type MobileMoneyOperator } from "@/lib/providers/payment-provider";
 import { sendParentMessage } from "@/lib/data/messages";
 import { useOffline } from "@/lib/offline/offline-context";
+import { useLocale } from "@/components/locale-provider";
 import { Toast, useToast } from "@/components/toast";
 
 interface Row {
@@ -39,6 +40,7 @@ export default function PaymentsView({
   const router = useRouter();
   const { online, runOrQueue } = useOffline();
   const { message, flash } = useToast();
+  const { t, locale } = useLocale();
   const [rows, setRows] = useState(students);
   const [collectFor, setCollectFor] = useState<Row | null>(
     () =>
@@ -65,7 +67,7 @@ export default function PaymentsView({
     if (!collectFor || !online) return;
     const target = collectFor;
     if (!target.parentPhone) {
-      setRequestError("Aucun numéro de téléphone parent enregistré pour cet élève.");
+      setRequestError(t("Aucun numéro de téléphone parent enregistré pour cet élève."));
       return;
     }
     setBusy(true);
@@ -85,10 +87,10 @@ export default function PaymentsView({
         ),
       );
       setCollectFor(null);
-      flash(`Demande envoyée au ${operator} de ${target.parentName ?? "parent"}`);
+      flash(t("Demande envoyée au {op} de {parent}", { op: operator, parent: target.parentName ?? t("parent") }));
       router.refresh();
     } catch (e) {
-      setRequestError(e instanceof Error ? e.message : "Échec de l'envoi de la demande.");
+      setRequestError(e instanceof Error ? e.message : t("Échec de l'envoi de la demande."));
     } finally {
       setBusy(false);
     }
@@ -104,7 +106,7 @@ export default function PaymentsView({
     const { synced } = await runOrQueue(
       {
         kind: "payment_confirm",
-        label: `Confirmation paiement · ${target.fullName}`,
+        label: `${t("Confirmation paiement")} · ${target.fullName}`,
         payload: { studentId: target.id, period },
       },
       async () => {
@@ -114,11 +116,11 @@ export default function PaymentsView({
           studentId: target.id,
           no: payment.receipt_no ?? "",
           rows: [
-            { k: "Élève", v: target.fullName },
-            { k: "Période", v: period },
-            { k: "Montant", v: formatFcfa(fee) },
-            { k: "Moyen", v: target.payment?.method ?? "Mobile money" },
-            { k: "Date", v: new Date().toLocaleDateString("fr-FR") },
+            { k: t("Élève"), v: target.fullName },
+            { k: t("Période"), v: period },
+            { k: t("Montant"), v: formatFcfa(fee) },
+            { k: t("Moyen"), v: target.payment?.method ?? t("Mobile money") },
+            { k: t("Date"), v: new Date().toLocaleDateString(locale === "ar" ? "ar" : "fr-FR") },
           ],
         });
       },
@@ -134,24 +136,24 @@ export default function PaymentsView({
           s.id === target.id ? { ...s, payment: { ...s.payment!, status: "paid", receiptNo: null } } : s,
         ),
       );
-      flash("Hors ligne · confirmation enregistrée, reçu généré à la synchronisation");
+      flash(t("Hors ligne · confirmation enregistrée, reçu généré à la synchronisation"));
     }
   }
 
   function openReceipt(s: Row) {
     if (!s.payment) return;
     if (!s.payment.receiptNo) {
-      flash("Reçu en attente de synchronisation");
+      flash(t("Reçu en attente de synchronisation"));
       return;
     }
     setReceipt({
       studentId: s.id,
       no: s.payment.receiptNo,
       rows: [
-        { k: "Élève", v: s.fullName },
-        { k: "Période", v: period },
-        { k: "Montant", v: formatFcfa(fee) },
-        { k: "Moyen", v: s.payment.method ?? "Mobile money" },
+        { k: t("Élève"), v: s.fullName },
+        { k: t("Période"), v: period },
+        { k: t("Montant"), v: formatFcfa(fee) },
+        { k: t("Moyen"), v: s.payment.method ?? t("Mobile money") },
       ],
     });
   }
@@ -164,17 +166,13 @@ export default function PaymentsView({
     }
     const receiptNo = receipt?.no ?? "";
     setReceipt(null);
+    const body = t("Reçu de paiement {no} · {amount} · merci.", { no: receiptNo, amount: formatFcfa(fee) });
 
     const { synced } = await runOrQueue(
       {
         kind: "message",
-        label: `Reçu · ${student.fullName}`,
-        payload: {
-          schoolId,
-          studentId: student.id,
-          toPhone: student.parentPhone,
-          body: `Reçu de paiement ${receiptNo} · ${formatFcfa(fee)} · merci.`,
-        },
+        label: `${t("Reçu")} · ${student.fullName}`,
+        payload: { schoolId, studentId: student.id, toPhone: student.parentPhone, body },
       },
       async () => {
         const supabase = createClient();
@@ -182,23 +180,23 @@ export default function PaymentsView({
           schoolId,
           studentId: student.id,
           toPhone: student.parentPhone as string,
-          body: `Reçu de paiement ${receiptNo} · ${formatFcfa(fee)} · merci.`,
+          body,
         });
       },
     );
 
-    flash(synced ? "Reçu envoyé sur WhatsApp au parent" : "Hors ligne · envoi en attente de synchronisation");
+    flash(synced ? t("Reçu envoyé sur WhatsApp au parent") : t("Hors ligne · envoi en attente de synchronisation"));
   }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-0.5">
-        <div className="font-serif text-2xl font-semibold text-ink">Mensualités · {period}</div>
+        <div className="font-serif text-2xl font-semibold text-ink">{t("Mensualités")} · {period}</div>
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[14px] bg-green p-4 text-card-alt">
         <div className="text-xs uppercase tracking-[0.1em] text-white/70">
-          Encaissé sur {formatFcfa(expected)} attendus
+          {t("Encaissé sur {expected} attendus", { expected: formatFcfa(expected) })}
         </div>
         <div className="font-serif text-[30px] font-semibold">{formatFcfa(collected)}</div>
         <div className="h-1.5 overflow-hidden rounded-full bg-black/20">
@@ -220,9 +218,10 @@ export default function PaymentsView({
               <div className="flex flex-1 flex-col gap-0.5">
                 <div className="text-sm font-semibold text-ink">{s.fullName}</div>
                 <div className="text-xs text-ink-muted">
-                  {paid && `${pendingSync ? "Payé (à synchroniser)" : "Payé"} · ${s.payment?.method} · ${formatFcfa(fee)}`}
-                  {pending && `En attente · demande envoyée sur ${s.payment?.method} · ${formatFcfa(fee)}`}
-                  {!paid && !pending && `Dû · ${formatFcfa(fee)} · parent ${s.parentPhone ?? "—"}`}
+                  {paid &&
+                    `${pendingSync ? t("Payé (à synchroniser)") : t("Payé")} · ${s.payment?.method} · ${formatFcfa(fee)}`}
+                  {pending && t("En attente · demande envoyée sur {op} · {amount}", { op: s.payment?.method ?? "", amount: formatFcfa(fee) })}
+                  {!paid && !pending && t("Dû · {amount} · parent {phone}", { amount: formatFcfa(fee), phone: s.parentPhone ?? "—" })}
                 </div>
               </div>
               <button
@@ -236,7 +235,7 @@ export default function PaymentsView({
                       : "bg-green text-card-alt"
                 }`}
               >
-                {paid ? "Reçu" : pending ? "Confirmer la réception" : "Encaisser"}
+                {paid ? t("Reçu") : pending ? t("Confirmer la réception") : t("Encaisser")}
               </button>
             </div>
           );
@@ -251,9 +250,9 @@ export default function PaymentsView({
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className="flex flex-col gap-0.5">
-                <div className="font-serif text-lg font-semibold text-ink">Encaisser · {collectFor.fullName}</div>
+                <div className="font-serif text-lg font-semibold text-ink">{t("Encaisser")} · {collectFor.fullName}</div>
                 <div className="text-[13px] text-ink-muted">
-                  Mensualité {period} · {formatFcfa(fee)}
+                  {t("Mensualité {period}", { period })} · {formatFcfa(fee)}
                 </div>
               </div>
               <button onClick={() => setCollectFor(null)} className="text-lg text-ink-faint">
@@ -265,15 +264,15 @@ export default function PaymentsView({
                 <button
                   key={o.name}
                   onClick={() => setOperator(o.name)}
-                  className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left ${
+                  className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-start ${
                     operator === o.name ? "border-green bg-[#F2F7F3]" : "border-border-soft bg-card"
                   }`}
                 >
-                  <span className="h-[30px] w-[30px] rounded-lg" style={{ background: o.color }} />
+                  <span className="h-[30px] w-[30px] shrink-0 rounded-lg" style={{ background: o.color }} />
                   <div className="flex flex-1 flex-col gap-0.5">
                     <span className="text-sm font-semibold text-ink">{o.name}</span>
                     <span className="text-xs text-ink-muted">
-                      {collectFor.parentPhone ?? "Pas de numéro enregistré"} · {collectFor.parentName}
+                      {collectFor.parentPhone ?? t("Pas de numéro enregistré")} · {collectFor.parentName}
                     </span>
                   </div>
                   {operator === o.name && <span className="text-sm text-green">✓</span>}
@@ -283,7 +282,7 @@ export default function PaymentsView({
 
             {!online && (
               <div className="mt-3 rounded-lg bg-terracotta-tint px-3 py-2.5 text-xs text-terracotta">
-                Connexion requise pour envoyer la demande à l&apos;opérateur — réessayez une fois en ligne.
+                {t("Connexion requise pour envoyer la demande à l'opérateur — réessayez une fois en ligne.")}
               </div>
             )}
             {requestError && <div className="mt-3 text-xs text-terracotta">{requestError}</div>}
@@ -293,11 +292,10 @@ export default function PaymentsView({
               disabled={busy || !online}
               className="mt-4 w-full rounded-xl bg-green py-3.5 text-sm font-semibold text-card-alt hover:bg-green-dark disabled:opacity-60"
             >
-              {busy ? "Envoi…" : "Demander le paiement"}
+              {busy ? t("Envoi…") : t("Demander le paiement")}
             </button>
             <div className="mt-2.5 text-center text-[11.5px] text-ink-faint">
-              Le parent reçoit une demande sur son téléphone. Une fois l&apos;argent reçu, confirmez dans l&apos;app
-              pour générer le reçu.
+              {t("Le parent reçoit une demande sur son téléphone. Une fois l'argent reçu, confirmez dans l'app pour générer le reçu.")}
             </div>
           </div>
         </div>
@@ -313,7 +311,7 @@ export default function PaymentsView({
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-tint text-lg text-green">
                 ✓
               </div>
-              <div className="font-serif text-lg font-semibold text-ink">Paiement reçu</div>
+              <div className="font-serif text-lg font-semibold text-ink">{t("Paiement reçu")}</div>
               <div className="text-xs text-ink-muted">{receipt.no}</div>
             </div>
             <div className="flex flex-col gap-2.5 border-y border-dashed border-border-input py-3.5">
@@ -329,13 +327,13 @@ export default function PaymentsView({
                 onClick={() => setReceipt(null)}
                 className="flex-1 rounded-lg border border-border-input py-2.5 text-xs font-semibold text-ink-soft"
               >
-                Fermer
+                {t("Fermer")}
               </button>
               <button
                 onClick={sendReceipt}
                 className="flex-1 rounded-lg bg-green py-2.5 text-xs font-semibold text-card-alt"
               >
-                Envoyer au parent
+                {t("Envoyer au parent")}
               </button>
             </div>
           </div>

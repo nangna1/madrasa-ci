@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { initials, createStudent } from "@/lib/data/students";
+import { useLocale } from "@/components/locale-provider";
 
 interface Row {
   id: string;
@@ -31,6 +32,7 @@ export default function StudentsList({
   classId: string;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
   const [query, setQuery] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [draft, setDraft] = useState(emptyDraft);
@@ -59,7 +61,7 @@ export default function StudentsList({
       setShowForm(false);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur lors de l'ajout.");
+      setError(e instanceof Error ? e.message : t("Erreur lors de l'ajout."));
     } finally {
       setSaving(false);
     }
@@ -69,15 +71,15 @@ export default function StudentsList({
     <div className="flex flex-col gap-4">
       <div className="flex items-end justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <div className="font-serif text-2xl font-semibold text-ink">Élèves</div>
+          <div className="font-serif text-2xl font-semibold text-ink">{t("Élèves")}</div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-xs text-ink-muted">{total} inscrits</div>
+          <div className="text-xs text-ink-muted">{t("{n} inscrits", { n: total })}</div>
           <button
             onClick={() => setShowForm((v) => !v)}
             className="rounded-lg border border-green px-3 py-1.5 text-xs font-semibold text-green"
           >
-            {showForm ? "Annuler" : "+ Ajouter un élève"}
+            {showForm ? t("Annuler") : t("+ Ajouter un élève")}
           </button>
         </div>
       </div>
@@ -88,14 +90,14 @@ export default function StudentsList({
             type="text"
             value={draft.fullName}
             onChange={(e) => setDraft({ ...draft, fullName: e.target.value })}
-            placeholder="Nom complet *"
+            placeholder={t("Nom complet *")}
             className="rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
           />
           <input
             type="text"
             value={draft.nameAr}
             onChange={(e) => setDraft({ ...draft, nameAr: e.target.value })}
-            placeholder="Nom en arabe (facultatif)"
+            placeholder={t("Nom en arabe (facultatif)")}
             dir="rtl"
             className="font-arabic rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
           />
@@ -104,14 +106,14 @@ export default function StudentsList({
               type="number"
               value={draft.age}
               onChange={(e) => setDraft({ ...draft, age: e.target.value })}
-              placeholder="Âge"
+              placeholder={t("Âge")}
               className="w-24 rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
             />
             <input
               type="text"
               value={draft.parentName}
               onChange={(e) => setDraft({ ...draft, parentName: e.target.value })}
-              placeholder="Nom du parent"
+              placeholder={t("Nom du parent")}
               className="flex-1 rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
             />
           </div>
@@ -119,7 +121,7 @@ export default function StudentsList({
             type="tel"
             value={draft.parentPhone}
             onChange={(e) => setDraft({ ...draft, parentPhone: e.target.value })}
-            placeholder="Téléphone du parent (ex. 07 48 12 90)"
+            placeholder={t("Téléphone du parent (ex. 07 48 12 90)")}
             className="rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
           />
           {error && <div className="text-xs text-terracotta">{error}</div>}
@@ -128,7 +130,7 @@ export default function StudentsList({
             disabled={saving || !draft.fullName.trim()}
             className="rounded-lg bg-green py-2.5 text-sm font-semibold text-card-alt disabled:opacity-40"
           >
-            {saving ? "Ajout…" : "Ajouter à la classe"}
+            {saving ? t("Ajout…") : t("Ajouter à la classe")}
           </button>
         </div>
       )}
@@ -136,7 +138,7 @@ export default function StudentsList({
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher un élève…"
+        placeholder={t("Rechercher un élève…")}
         className="w-full rounded-[10px] border border-border-input bg-card px-3.5 py-2.5 text-sm text-ink outline-none focus:border-green"
       />
 
@@ -167,17 +169,15 @@ export default function StudentsList({
                   s.paid ? "bg-green-tint text-green" : "bg-terracotta-tint text-terracotta"
                 }`}
               >
-                {s.paid ? "À jour" : "Impayé"}
+                {s.paid ? t("À jour") : t("Impayé")}
               </span>
               <span className="text-[11px] text-ink-faint">
-                {s.progress}/{totalSourates} sourates
+                {s.progress}/{totalSourates} {t("sourates")}
               </span>
             </div>
           </Link>
         ))}
-        {visible.length === 0 && (
-          <div className="py-8 text-center text-sm text-ink-faint">Aucun élève trouvé.</div>
-        )}
+        {visible.length === 0 && <div className="py-8 text-center text-sm text-ink-faint">{t("Aucun élève trouvé.")}</div>}
       </div>
     </div>
   );
