@@ -26,6 +26,37 @@ export async function getProgressForStudent(
   return new Map(data.map((r) => [r.sourate_id, r.status]));
 }
 
+// Version "en masse" de getProgressForStudent, pour afficher toute une
+// classe sans une requête par élève (utilisé par l'écran "Cours en direct").
+export async function getProgressRows(
+  supabase: SupabaseClient<Database>,
+  studentIds: string[],
+): Promise<Map<string, Map<number, MemoStatus>>> {
+  if (studentIds.length === 0) return new Map();
+  const { data, error } = await supabase
+    .from("memorization_progress")
+    .select("student_id, sourate_id, status")
+    .in("student_id", studentIds);
+  if (error) throw error;
+
+  const byStudent = new Map<string, Map<number, MemoStatus>>();
+  for (const row of data) {
+    if (!byStudent.has(row.student_id)) byStudent.set(row.student_id, new Map());
+    byStudent.get(row.student_id)!.set(row.sourate_id, row.status);
+  }
+  return byStudent;
+}
+
+// Prochaine sourate sur laquelle travailler avec un élève : la première non
+// encore mémorisée, dans l'ordre d'apprentissage (`sourates` déjà trié
+// juz' 30 → 1 par getSourates). Null si tout est mémorisé.
+export function nextSourateFor(sourates: Sourate[], progress: Map<number, MemoStatus> | undefined): Sourate | null {
+  for (const s of sourates) {
+    if ((progress?.get(s.id) ?? "todo") !== "ok") return s;
+  }
+  return null;
+}
+
 export async function getProgressCounts(
   supabase: SupabaseClient<Database>,
   studentIds: string[],

@@ -95,6 +95,18 @@ export default async function TeacherHomePage() {
       </div>
 
       <Link
+        href="/teacher/cours-en-direct"
+        className="flex items-center justify-between gap-3 rounded-xl bg-green px-3.5 py-3.5 text-card-alt"
+      >
+        <div className="flex flex-col gap-0.5">
+          <div className="text-xs uppercase tracking-[0.1em] text-white/70">{myClass.name}</div>
+          <div className="text-sm font-semibold">▶ Cours en direct</div>
+          <div className="text-xs text-white/70">Présence et mémorisation, élève par élève</div>
+        </div>
+        <span className="text-lg text-white/70">›</span>
+      </Link>
+
+      <Link
         href="/teacher/emploi-du-temps"
         className="flex items-center justify-between gap-3 rounded-xl border border-border-soft bg-card px-3.5 py-3"
       >
