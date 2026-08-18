@@ -5,7 +5,7 @@
 // Supabase créé, pour rester synchronisé avec le schéma réel.
 
 export type SchoolStatus = "non_integree" | "en_cours" | "integree";
-export type ProfileRole = "teacher" | "federation_admin";
+export type ProfileRole = "teacher" | "federation_admin" | "student";
 export type MemoStatus = "todo" | "wip" | "ok";
 export type PaymentStatus = "paid" | "pending" | "unpaid";
 export type MessageStatus = "draft" | "sent" | "failed";
@@ -53,6 +53,7 @@ export interface Database {
           phone: string | null;
           school_id: string | null;
           federation_id: string | null;
+          student_id: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {
@@ -248,6 +249,10 @@ export interface Database {
       next_receipt_no: {
         Args: Record<string, never>;
         Returns: string;
+      };
+      current_student_id: {
+        Args: Record<string, never>;
+        Returns: string | null;
       };
     };
     Enums: Record<string, never>;

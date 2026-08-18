@@ -7,5 +7,7 @@ export default async function RootPage() {
   const profile = await getCurrentProfile(supabase);
 
   if (!profile) redirect("/login");
-  redirect(profile.role === "teacher" ? "/teacher" : "/federation");
+  if (profile.role === "teacher") redirect("/teacher");
+  if (profile.role === "student") redirect("/eleve");
+  redirect("/federation");
 }

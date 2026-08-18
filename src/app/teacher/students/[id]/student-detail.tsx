@@ -6,9 +6,20 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { nextMemoStatus, setProgress } from "@/lib/data/memorization";
 import { initials } from "@/lib/data/students";
+import { createStudentAccess } from "@/app/actions/student-access";
 import type { MemoStatus } from "@/lib/supabase/types";
 import { useOffline } from "@/lib/offline/offline-context";
 import { Toast, useToast } from "@/components/toast";
+
+// Numéros locaux ("07 48 12 90") faute d'indicatif saisi ailleurs dans
+// l'app — +225 (Côte d'Ivoire) uniquement si aucun indicatif n'est déjà
+// présent, pour construire un lien wa.me valide.
+function toWhatsAppNumber(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, "");
+  if (digits.startsWith("+")) return digits.slice(1);
+  if (digits.startsWith("00")) return digits.slice(2);
+  return `225${digits.replace(/^0/, "")}`;
+}
 
 interface SourateRow {
   id: number;
@@ -30,17 +41,40 @@ export default function StudentDetail({
   memoCount,
   totalSourates,
   paid,
+  parentPhone,
+  hasAccess,
 }: {
   student: { id: string; fullName: string; nameAr: string | null; meta: string };
   sourates: SourateRow[];
   memoCount: number;
   totalSourates: number;
   paid: boolean;
+  parentPhone: string | null;
+  hasAccess: boolean;
 }) {
   const router = useRouter();
   const { runOrQueue } = useOffline();
   const { message, flash } = useToast();
   const [rows, setRows] = useState(sourates);
+  const [access, setAccess] = useState<{ hasAccess: boolean; code: string | null }>({
+    hasAccess,
+    code: null,
+  });
+  const [creatingAccess, setCreatingAccess] = useState(false);
+  const [accessError, setAccessError] = useState<string | null>(null);
+
+  async function handleCreateAccess() {
+    setCreatingAccess(true);
+    setAccessError(null);
+    const result = await createStudentAccess(student.id);
+    setCreatingAccess(false);
+    if ("error" in result) {
+      setAccessError(result.error);
+      return;
+    }
+    setAccess({ hasAccess: true, code: result.code });
+    router.refresh();
+  }
 
   async function cycle(row: SourateRow) {
     const next = nextMemoStatus(row.status);
@@ -143,6 +177,52 @@ export default function StudentDetail({
         >
           {paid ? "Voir le reçu" : "Encaisser"}
         </Link>
+      </div>
+
+      <div className="flex flex-col gap-2.5 rounded-[14px] border border-border-soft bg-card p-3.5">
+        <div className="flex items-baseline justify-between">
+          <span className="text-xs uppercase tracking-[0.1em] text-ink-faint">Accès élève</span>
+          {access.hasAccess && !access.code && (
+            <span className="text-[11px] font-semibold text-green">Actif</span>
+          )}
+        </div>
+
+        {access.code ? (
+          <>
+            <div className="rounded-[11px] border border-dashed border-green bg-[#F2F7F3] px-3 py-3 text-center">
+              <div className="text-[11px] text-ink-muted">Code d&apos;accès — à noter, affiché une seule fois</div>
+              <div className="font-serif text-2xl font-semibold tracking-[0.1em] text-ink">{access.code}</div>
+            </div>
+            {parentPhone && (
+              <a
+                href={`https://wa.me/${toWhatsAppNumber(parentPhone)}?text=${encodeURIComponent(
+                  `Madrasa CI — accès de ${student.fullName} : ouvrez le lien de connexion élève et entrez ce code : ${access.code}`,
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-[11px] bg-green py-3 text-center text-[13px] font-semibold text-card-alt hover:bg-green-dark"
+              >
+                Envoyer le code par WhatsApp
+              </a>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="text-[13px] text-ink-muted">
+              {access.hasAccess
+                ? "Un code déjà transmis reste valable — n'en générez un nouveau que s'il a été perdu."
+                : "Génère un code de connexion à transmettre au parent, pour que l'élève suive sa progression."}
+            </div>
+            <button
+              onClick={handleCreateAccess}
+              disabled={creatingAccess}
+              className="rounded-[11px] border border-green py-3 text-center text-[13px] font-semibold text-green hover:bg-[#EFF4F0] disabled:opacity-60"
+            >
+              {creatingAccess ? "Création…" : access.hasAccess ? "Régénérer le code" : "Créer un accès élève"}
+            </button>
+            {accessError && <div className="text-xs text-terracotta">{accessError}</div>}
+          </>
+        )}
       </div>
 
       <Toast message={message} />

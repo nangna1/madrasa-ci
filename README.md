@@ -4,12 +4,16 @@ App de gestion pour les écoles coraniques et médersas de Côte d'Ivoire —
 implémentation Next.js à partir des maquettes Claude Design du dossier
 `../cr-ation-d-un-saas/` (conservé comme référence visuelle).
 
-Deux interfaces dans une seule codebase :
+Trois interfaces dans une seule codebase :
 
 - **App enseignant** (`/teacher`) — mobile-first : effectifs, appel, suivi
   de mémorisation sourate par sourate, mensualités, messages parents,
   matières et emploi du temps réels (catalogue de matières coraniques et
-  programme national ivoirien, composé librement par classe).
+  programme national ivoirien, composé librement par classe), écran "Cours
+  en direct" (présence + prochaine sourate par élève, en une seule page).
+- **Espace élève** (`/eleve`) — lecture seule : progression Coran, présence
+  du mois, statut de la mensualité. Compte créé par l'enseignant depuis la
+  fiche élève (pas d'auto-inscription) et son code transmis par WhatsApp.
 - **Dashboard fédération** (`/federation`) — vue d'ensemble du réseau,
   écoles membres, dossier de plaidoyer d'intégration.
 
@@ -21,10 +25,14 @@ Deux interfaces dans une seule codebase :
    - `supabase/migrations/0002_classes.sql` (classes, emploi du temps, plusieurs enseignants par école)
    - `supabase/migrations/0003_subjects.sql` (catalogue de matières réelles — coraniques et programme national ivoirien)
    - `supabase/migrations/0004_payment_pending.sql` (statut "en attente" pour le cycle de paiement mobile money)
+   - `supabase/migrations/0005_student_accounts.sql` (comptes élève en lecture seule)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
    - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme
-   du projet (**Project Settings → API**).
+   du projet (**Project Settings → API**). Ajoutez aussi `SUPABASE_SERVICE_ROLE_KEY`
+   (même écran, secret "service_role") si vous voulez créer des accès élève —
+   voir la section dédiée plus bas. Ne la partagez jamais : elle contourne
+   totalement la RLS.
 
 ## 2. Créer vos comptes de connexion
 
@@ -49,6 +57,28 @@ puis vers `/teacher` ou `/federation` selon le rôle du compte connecté.
 
 **Important** : sans projet Supabase configuré (étapes 1-2), l'app ne rend rien —
 l'authentification est vérifiée sur chaque requête (`src/proxy.ts`), y compris `/login`.
+
+## Comptes élève
+
+Depuis la fiche élève (`/teacher/students/[id]`), l'enseignant clique
+"Créer un accès élève" : un code à 8 caractères est généré, un vrai compte
+`auth.users` est créé côté serveur (`createStudentAccess`,
+`src/app/actions/student-access.ts`, via la clé service_role — voir
+`SUPABASE_SERVICE_ROLE_KEY` ci-dessus), et le code s'affiche **une seule
+fois** avec un bouton "Envoyer par WhatsApp" (lien `wa.me` réel, pas le
+provider de messagerie simulé). L'élève se connecte ensuite sur `/login`,
+onglet "Élève", en tapant uniquement ce code — pas d'e-mail ni de mot de
+passe à comprendre.
+
+Techniquement, ce code *est* le mot de passe (un e-mail interne
+`CODE@eleves.madrasa-ci.local` est fabriqué pour satisfaire Supabase Auth,
+qui exige un identifiant, mais n'est ni affiché ni utilisé ailleurs).
+Compromis assumé pour un compte à faible enjeu (lecture seule, aucune
+donnée bancaire) partagé par WhatsApp à un enfant : un code égaré donne
+seulement une vue en lecture de la progression Coran / présence /
+mensualité de cet élève, jamais un accès en écriture (la RLS n'autorise que
+`select`, aucune policy `insert`/`update`/`delete` pour ce rôle). Régénérer
+le code (même bouton) invalide immédiatement l'ancien.
 
 ## Mode hors-ligne (app enseignant)
 

@@ -20,6 +20,24 @@ export async function getAttendanceForDate(
   return new Map(data.map((r) => [r.student_id, r.present]));
 }
 
+// Résumé du mois courant pour un seul élève — utilisé par l'espace élève
+// (aucun besoin de la présence jour par jour, juste "X présences / Y jours
+// enregistrés" pour donner une idée de l'assiduité).
+export async function getMonthAttendanceSummary(
+  supabase: SupabaseClient<Database>,
+  studentId: string,
+): Promise<{ present: number; recorded: number }> {
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const { data, error } = await supabase
+    .from("attendance")
+    .select("present")
+    .eq("student_id", studentId)
+    .gte("date", monthStart);
+  if (error) throw error;
+  return { present: data.filter((r) => r.present === true).length, recorded: data.length };
+}
+
 export async function markAttendance(
   supabase: SupabaseClient<Database>,
   studentId: string,

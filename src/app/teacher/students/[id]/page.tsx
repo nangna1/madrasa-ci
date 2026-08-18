@@ -22,10 +22,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const student = await getStudent(supabase, id);
   if (!student) notFound();
 
-  const [sourates, progress, payments] = await Promise.all([
+  const [sourates, progress, payments, existingAccess] = await Promise.all([
     getSourates(supabase),
     getProgressForStudent(supabase, id),
     getPaymentsForPeriod(supabase, [id], currentPeriod()),
+    supabase.from("profiles").select("id").eq("student_id", id).eq("role", "student").maybeSingle(),
   ]);
 
   const memoCount = [...progress.values()].filter((s) => s === "ok").length;
@@ -48,6 +49,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       memoCount={memoCount}
       totalSourates={TOTAL_SOURATES}
       paid={payments.get(id)?.status === "paid"}
+      parentPhone={student.parent_phone}
+      hasAccess={Boolean(existingAccess.data)}
     />
   );
 }
