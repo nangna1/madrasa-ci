@@ -9,6 +9,7 @@ import { initials } from "@/lib/data/students";
 import { createStudentAccess } from "@/app/actions/student-access";
 import type { MemoStatus } from "@/lib/supabase/types";
 import { useOffline } from "@/lib/offline/offline-context";
+import { useLocale } from "@/components/locale-provider";
 import { Toast, useToast } from "@/components/toast";
 
 // Numéros locaux ("07 48 12 90") faute d'indicatif saisi ailleurs dans
@@ -55,6 +56,7 @@ export default function StudentDetail({
   const router = useRouter();
   const { runOrQueue } = useOffline();
   const { message, flash } = useToast();
+  const { t } = useLocale();
   const [rows, setRows] = useState(sourates);
   const [access, setAccess] = useState<{ hasAccess: boolean; code: string | null }>({
     hasAccess,
@@ -93,10 +95,10 @@ export default function StudentDetail({
     );
 
     if (synced) {
-      if (next === "ok") flash(`Sourate ${row.name} validée · ${student.fullName}`);
+      if (next === "ok") flash(t("Sourate {name} validée · {student}", { name: row.name, student: student.fullName }));
       router.refresh();
     } else {
-      flash("Hors ligne · action enregistrée, envoi à la synchronisation");
+      flash(t("Hors ligne · action enregistrée, envoi à la synchronisation"));
     }
   }
 
@@ -105,7 +107,7 @@ export default function StudentDetail({
   return (
     <div className="flex flex-col gap-[18px]">
       <Link href="/teacher/students" className="text-[13px] text-ink-muted">
-        ‹ Retour
+        {t("‹ Retour")}
       </Link>
 
       <div className="flex items-center gap-3.5">
@@ -125,7 +127,7 @@ export default function StudentDetail({
 
       <div className="flex flex-col gap-2.5 rounded-[14px] border border-border-soft bg-card p-3.5">
         <div className="flex items-baseline justify-between">
-          <span className="text-xs uppercase tracking-[0.1em] text-ink-faint">Mémorisation</span>
+          <span className="text-xs uppercase tracking-[0.1em] text-ink-faint">{t("Mémorisation")}</span>
           <span className="text-[13px] font-semibold text-green">
             {memoCount}/{totalSourates}
           </span>
@@ -136,7 +138,7 @@ export default function StudentDetail({
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">Sourates</div>
+        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">{t("Sourates")}</div>
         {rows.map((s) => {
           const badge = BADGE[s.status];
           return (
@@ -157,7 +159,7 @@ export default function StudentDetail({
                 className="rounded-full px-2.5 py-1.5 text-[11px] font-semibold"
                 style={{ background: badge.bg, color: badge.fg }}
               >
-                {badge.label}
+                {t(badge.label)}
               </button>
             </div>
           );
@@ -169,40 +171,45 @@ export default function StudentDetail({
           href={`/teacher/parents?student=${student.id}&template=progres`}
           className="flex-1 rounded-[11px] border border-green py-3 text-center text-[13px] font-semibold text-green hover:bg-[#EFF4F0]"
         >
-          Message au parent
+          {t("Message au parent")}
         </Link>
         <Link
           href={paid ? "/teacher/payments" : `/teacher/payments?student=${student.id}`}
           className="flex-1 rounded-[11px] bg-green py-3 text-center text-[13px] font-semibold text-card-alt hover:bg-green-dark"
         >
-          {paid ? "Voir le reçu" : "Encaisser"}
+          {paid ? t("Voir le reçu") : t("Encaisser")}
         </Link>
       </div>
 
       <div className="flex flex-col gap-2.5 rounded-[14px] border border-border-soft bg-card p-3.5">
         <div className="flex items-baseline justify-between">
-          <span className="text-xs uppercase tracking-[0.1em] text-ink-faint">Accès élève</span>
+          <span className="text-xs uppercase tracking-[0.1em] text-ink-faint">{t("Accès élève")}</span>
           {access.hasAccess && !access.code && (
-            <span className="text-[11px] font-semibold text-green">Actif</span>
+            <span className="text-[11px] font-semibold text-green">{t("Actif")}</span>
           )}
         </div>
 
         {access.code ? (
           <>
             <div className="rounded-[11px] border border-dashed border-green bg-[#F2F7F3] px-3 py-3 text-center">
-              <div className="text-[11px] text-ink-muted">Code d&apos;accès — à noter, affiché une seule fois</div>
-              <div className="font-serif text-2xl font-semibold tracking-[0.1em] text-ink">{access.code}</div>
+              <div className="text-[11px] text-ink-muted">{t("Code d'accès — à noter, affiché une seule fois")}</div>
+              <div dir="ltr" className="font-serif text-2xl font-semibold tracking-[0.1em] text-ink">
+                {access.code}
+              </div>
             </div>
             {parentPhone && (
               <a
                 href={`https://wa.me/${toWhatsAppNumber(parentPhone)}?text=${encodeURIComponent(
-                  `Madrasa CI — accès de ${student.fullName} : ouvrez le lien de connexion élève et entrez ce code : ${access.code}`,
+                  t("Madrasa CI — accès de {name} : ouvrez le lien de connexion élève et entrez ce code : {code}", {
+                    name: student.fullName,
+                    code: access.code,
+                  }),
                 )}`}
                 target="_blank"
                 rel="noreferrer"
                 className="rounded-[11px] bg-green py-3 text-center text-[13px] font-semibold text-card-alt hover:bg-green-dark"
               >
-                Envoyer le code par WhatsApp
+                {t("Envoyer le code par WhatsApp")}
               </a>
             )}
           </>
@@ -210,15 +217,15 @@ export default function StudentDetail({
           <>
             <div className="text-[13px] text-ink-muted">
               {access.hasAccess
-                ? "Un code déjà transmis reste valable — n'en générez un nouveau que s'il a été perdu."
-                : "Génère un code de connexion à transmettre au parent, pour que l'élève suive sa progression."}
+                ? t("Un code déjà transmis reste valable — n'en générez un nouveau que s'il a été perdu.")
+                : t("Génère un code de connexion à transmettre au parent, pour que l'élève suive sa progression.")}
             </div>
             <button
               onClick={handleCreateAccess}
               disabled={creatingAccess}
               className="rounded-[11px] border border-green py-3 text-center text-[13px] font-semibold text-green hover:bg-[#EFF4F0] disabled:opacity-60"
             >
-              {creatingAccess ? "Création…" : access.hasAccess ? "Régénérer le code" : "Créer un accès élève"}
+              {creatingAccess ? t("Création…") : access.hasAccess ? t("Régénérer le code") : t("Créer un accès élève")}
             </button>
             {accessError && <div className="text-xs text-terracotta">{accessError}</div>}
           </>

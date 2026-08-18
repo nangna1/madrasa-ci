@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeLiveReading, getLiveAttachmentUrl, type LiveReading } from "@/lib/data/liveReading";
+import { useLocale } from "@/components/locale-provider";
 
 // Suit en temps réel ce que l'enseignant publie (voir live-reading-control.tsx
 // côté enseignant) — même compte utilisable sur un écran/tablette partagé en
@@ -15,6 +16,7 @@ export default function LiveReadingView({
   classId: string;
   initialReading: LiveReading | null;
 }) {
+  const { t } = useLocale();
   const [reading, setReading] = useState<LiveReading | null>(initialReading);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function LiveReadingView({
   return (
     <div className="flex flex-col gap-2.5 rounded-[14px] border border-green bg-[#F2F7F3] p-3.5">
       <div className="flex items-baseline justify-between">
-        <span className="text-xs font-semibold uppercase tracking-[0.1em] text-green">🔴 Lecture en direct</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.1em] text-green">{t("🔴 Lecture en direct")}</span>
         {reading.title && <span className="text-xs text-ink-muted">{reading.title}</span>}
       </div>
 
@@ -41,7 +43,7 @@ export default function LiveReadingView({
           <img src={attachmentUrl} alt={reading.attachment_name ?? ""} className="w-full rounded-lg object-contain" />
         ) : isAudio ? (
           <div className="flex flex-col gap-1.5 rounded-lg bg-white p-3">
-            <span className="text-xs font-semibold text-ink-muted">🎙️ Message vocal</span>
+            <span className="text-xs font-semibold text-ink-muted">{t("🎙️ Message vocal")}</span>
             <audio controls src={attachmentUrl} className="w-full" />
           </div>
         ) : (
@@ -51,7 +53,7 @@ export default function LiveReadingView({
             rel="noreferrer"
             className="flex items-center gap-2.5 rounded-lg bg-white p-3 text-sm text-green"
           >
-            📎 {reading.attachment_name ?? "Fichier joint"}
+            📎 {reading.attachment_name ?? t("Fichier joint")}
           </a>
         ))}
 

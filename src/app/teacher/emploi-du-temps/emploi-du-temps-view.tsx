@@ -13,6 +13,7 @@ import {
 import { addScheduleSlot, removeScheduleSlot, formatHeure, JOURS_SEMAINE } from "@/lib/data/classes";
 import type { ScheduleSlotWithSubject } from "@/lib/data/classes";
 import type { SubjectCategory } from "@/lib/supabase/types";
+import { useLocale } from "@/components/locale-provider";
 
 const CATEGORIES: SubjectCategory[] = ["coranique", "national"];
 
@@ -30,6 +31,7 @@ export default function EmploiDuTempsView({
   initialClassSubjects: (ClassSubject & { subject: Subject })[];
 }) {
   const router = useRouter();
+  const { t } = useLocale();
   const [classSubjects, setClassSubjects] = useState(initialClassSubjects);
   const [slots, setSlots] = useState(initialSlots);
   const [busySubject, setBusySubject] = useState<string | null>(null);
@@ -65,7 +67,7 @@ export default function EmploiDuTempsView({
       }
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur lors de la mise à jour.");
+      setError(e instanceof Error ? e.message : t("Erreur lors de la mise à jour."));
     } finally {
       setBusySubject(null);
     }
@@ -73,7 +75,7 @@ export default function EmploiDuTempsView({
 
   async function handleAddSlot() {
     if (slotFin <= slotDebut) {
-      setError("L'heure de fin doit être après l'heure de début.");
+      setError(t("L'heure de fin doit être après l'heure de début."));
       return;
     }
     setSavingSlot(true);
@@ -91,7 +93,7 @@ export default function EmploiDuTempsView({
       setShowSlotForm(false);
       setSlotMatiere("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur lors de l'ajout du créneau.");
+      setError(e instanceof Error ? e.message : t("Erreur lors de l'ajout du créneau."));
     } finally {
       setSavingSlot(false);
     }
@@ -105,7 +107,7 @@ export default function EmploiDuTempsView({
       setSlots((prev) => prev.filter((s) => s.id !== slotId));
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur lors de la suppression.");
+      setError(e instanceof Error ? e.message : t("Erreur lors de la suppression."));
     }
   }
 
@@ -117,12 +119,12 @@ export default function EmploiDuTempsView({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2.5">
-        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">Matières enseignées</div>
+        <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">{t("Matières enseignées")}</div>
         {CATEGORIES.map((cat) => {
           const items = catalog.filter((s) => s.category === cat);
           return (
             <div key={cat} className="flex flex-col gap-1.5">
-              <div className="text-[11px] font-semibold text-ink-muted">{CATEGORY_LABEL[cat]}</div>
+              <div className="text-[11px] font-semibold text-ink-muted">{t(CATEGORY_LABEL[cat])}</div>
               <div className="flex flex-wrap gap-1.5">
                 {items.map((subject) => {
                   const active = activeCodes.has(subject.code);
@@ -148,9 +150,9 @@ export default function EmploiDuTempsView({
 
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
-          <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">Emploi du temps · {className}</div>
+          <div className="text-xs uppercase tracking-[0.12em] text-ink-faint">{t("Emploi du temps")} · {className}</div>
           <button onClick={() => setShowSlotForm((v) => !v)} className="text-xs font-semibold text-green">
-            {showSlotForm ? "Annuler" : "+ Créneau"}
+            {showSlotForm ? t("Annuler") : t("+ Créneau")}
           </button>
         </div>
 
@@ -163,7 +165,7 @@ export default function EmploiDuTempsView({
             >
               {[1, 2, 3, 4, 5, 6, 7].map((j) => (
                 <option key={j} value={j}>
-                  {JOURS_SEMAINE[j]}
+                  {t(JOURS_SEMAINE[j])}
                 </option>
               ))}
             </select>
@@ -186,7 +188,7 @@ export default function EmploiDuTempsView({
               onChange={(e) => setSlotMatiere(e.target.value)}
               className="rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
             >
-              <option value="">— Matière non précisée —</option>
+              <option value="">{t("— Matière non précisée —")}</option>
               {classSubjects.map((cs) => (
                 <option key={cs.subject_code} value={cs.subject_code}>
                   {cs.subject.name}
@@ -194,16 +196,14 @@ export default function EmploiDuTempsView({
               ))}
             </select>
             {classSubjects.length === 0 && (
-              <div className="text-xs text-ink-faint">
-                Activez au moins une matière ci-dessus pour pouvoir la choisir ici.
-              </div>
+              <div className="text-xs text-ink-faint">{t("Activez au moins une matière ci-dessus pour pouvoir la choisir ici.")}</div>
             )}
             <button
               onClick={handleAddSlot}
               disabled={savingSlot}
               className="rounded-lg bg-green py-2.5 text-center text-sm font-semibold text-card-alt disabled:opacity-60"
             >
-              {savingSlot ? "Ajout…" : "Ajouter au planning"}
+              {savingSlot ? t("Ajout…") : t("Ajouter au planning")}
             </button>
           </div>
         )}
@@ -212,7 +212,7 @@ export default function EmploiDuTempsView({
           const creneaux = parJour.get(jour) ?? [];
           return (
             <div key={jour} className="flex flex-col gap-1.5 rounded-xl border border-border-soft bg-card px-3.5 py-3">
-              <div className="text-sm font-semibold text-ink">{JOURS_SEMAINE[jour]}</div>
+              <div className="text-sm font-semibold text-ink">{t(JOURS_SEMAINE[jour])}</div>
               {creneaux.length > 0 ? (
                 <div className="flex flex-col gap-1.5">
                   {creneaux.map((s) => (
@@ -221,10 +221,10 @@ export default function EmploiDuTempsView({
                         <span className="text-xs font-medium text-ink-soft">
                           {formatHeure(s.heure_debut)} – {formatHeure(s.heure_fin)}
                         </span>
-                        <span className="text-[11px] text-ink-faint">{s.subject?.name ?? "Matière non précisée"}</span>
+                        <span className="text-[11px] text-ink-faint">{s.subject?.name ?? t("Matière non précisée")}</span>
                       </div>
                       <button onClick={() => handleRemoveSlot(s.id)} className="text-xs text-terracotta">
-                        Retirer
+                        {t("Retirer")}
                       </button>
                     </div>
                   ))}

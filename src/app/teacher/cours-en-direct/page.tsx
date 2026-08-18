@@ -12,11 +12,13 @@ import CoursEnDirectView from "./cours-en-direct-view";
 import LiveReadingControl from "./live-reading-control";
 import AudioBroadcastControl from "./audio-broadcast-control";
 import RecordingsList from "@/components/recordings-list";
+import { getT } from "@/lib/i18n/server";
 
 export default async function CoursEnDirectPage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
+  const { t } = await getT();
 
   const myClass = await getMyClass(supabase);
   if (!myClass) redirect("/login");
@@ -61,19 +63,19 @@ export default async function CoursEnDirectPage() {
   return (
     <div className="flex flex-col gap-4">
       <Link href="/teacher" className="text-[13px] text-ink-muted">
-        ‹ Retour
+        {t("‹ Retour")}
       </Link>
 
       <div className="flex flex-col gap-0.5">
-        <div className="font-serif text-2xl font-semibold text-ink">Cours en direct</div>
+        <div className="font-serif text-2xl font-semibold text-ink">{t("Cours en direct")}</div>
         <div className="text-[13px] text-ink-muted">
           {myClass.name}
           {creneauxAujourdhui.length > 0
             ? " · " +
               creneauxAujourdhui
-                .map((s) => `${s.subject?.name ?? "Matière non précisée"} (${formatHeure(s.heure_debut)}–${formatHeure(s.heure_fin)})`)
+                .map((s) => `${s.subject?.name ?? t("Matière non précisée")} (${formatHeure(s.heure_debut)}–${formatHeure(s.heure_fin)})`)
                 .join(" · ")
-            : " · pas de créneau aujourd'hui"}
+            : " · " + t("pas de créneau aujourd'hui")}
         </div>
       </div>
 

@@ -155,6 +155,106 @@ export const ar: Record<string, string> = {
   "Paiement reçu": "تم استلام الدفع",
   "Envoyer au parent": "إرسال إلى ولي الأمر",
 
+  // Parents
+  "Message": "الرسالة",
+  "{sent} message(s) envoyé(s), {queued} en attente de synchronisation": "{sent} رسالة مُرسَلة، {queued} في انتظار المزامنة",
+  "Message envoyé à {n} parents{audio}": "أُرسلت الرسالة إلى {n} من أولياء الأمور{audio}",
+  " (+ audio dioula)": " (+ رسالة صوتية بالديولا)",
+  "Message aux parents": "رسالة إلى أولياء الأمور",
+  "Envoi par WhatsApp · aucune application à installer côté parent": "إرسال عبر واتساب · لا حاجة لتثبيت أي تطبيق لدى ولي الأمر",
+  "Écrire le message…": "اكتب الرسالة…",
+  "{n} parents · WhatsApp": "{n} من أولياء الأمور · واتساب",
+  "Numéros parents enregistrés": "أرقام أولياء الأمور المسجَّلة",
+  "+ version audio dioula": "+ نسخة صوتية بالديولا",
+  "Envoyer sur WhatsApp": "إرسال عبر واتساب",
+
+  // Emploi du temps
+  "Emploi du temps": "الجدول الزمني",
+  "Erreur lors de la mise à jour.": "خطأ أثناء التحديث.",
+  "L'heure de fin doit être après l'heure de début.": "يجب أن يكون وقت الانتهاء بعد وقت البدء.",
+  "Erreur lors de l'ajout du créneau.": "خطأ أثناء إضافة الحصة.",
+  "Erreur lors de la suppression.": "خطأ أثناء الحذف.",
+  "Matières enseignées": "المواد المُدرَّسة",
+  "+ Créneau": "+ حصة",
+  "— Matière non précisée —": "— مادة غير محدَّدة —",
+  "Activez au moins une matière ci-dessus pour pouvoir la choisir ici.": "فعِّلوا مادة واحدة على الأقل أعلاه لتتمكنوا من اختيارها هنا.",
+  "Ajouter au planning": "إضافة إلى الجدول",
+  "Matière non précisée": "مادة غير محدَّدة",
+  "Matières coraniques": "المواد القرآنية",
+  "Programme national": "البرنامج الوطني",
+  "Lundi": "الإثنين",
+  "Mardi": "الثلاثاء",
+  "Mercredi": "الأربعاء",
+  "Jeudi": "الخميس",
+  "Vendredi": "الجمعة",
+  "Samedi": "السبت",
+  "Dimanche": "الأحد",
+  "{class} · {age} ans · parent {parent}": "{class} · {age} سنة · ولي الأمر {parent}",
+  "{class} · {age} ans": "{class} · {age} سنة",
+
+  // Fiche élève
+  "Sourate {name} validée · {student}": "تمّ اعتماد سورة {name} · {student}",
+  "Mémorisation": "الحفظ",
+  "Message au parent": "رسالة إلى ولي الأمر",
+  "Voir le reçu": "عرض الإيصال",
+  "Accès élève": "وصول التلميذ",
+  "Actif": "نشط",
+  "Code d'accès — à noter, affiché une seule fois": "رمز الدخول — دوّنوه، يظهر مرة واحدة فقط",
+  "Madrasa CI — accès de {name} : ouvrez le lien de connexion élève et entrez ce code : {code}":
+    "Madrasa CI — وصول {name} : افتحوا رابط دخول التلميذ وأدخلوا هذا الرمز: {code}",
+  "Envoyer le code par WhatsApp": "إرسال الرمز عبر واتساب",
+  "Un code déjà transmis reste valable — n'en générez un nouveau que s'il a été perdu.":
+    "الرمز المُرسَل سابقاً لا يزال صالحاً — لا تُنشئوا رمزاً جديداً إلا في حال ضياعه.",
+  "Génère un code de connexion à transmettre au parent, pour que l'élève suive sa progression.":
+    "يُنشئ رمز دخول لتسليمه لولي الأمر، ليتمكن التلميذ من متابعة تقدّمه.",
+  "Création…": "جارٍ الإنشاء…",
+  "Régénérer le code": "تجديد الرمز",
+  "Créer un accès élève": "إنشاء وصول للتلميذ",
+
+  // Cours en direct
+  "Cours en direct": "الدرس المباشر",
+  "pas de créneau aujourd'hui": "لا حصة اليوم",
+  "Hors ligne · présence enregistrée, envoi à la synchronisation": "غير متصل · تم تسجيل الحضور، سيُرسَل عند عودة الاتصال",
+  "Prochaine sourate": "السورة التالية",
+  "🎉 Coran mémorisé en entier": "🎉 تمّ حفظ القرآن الكريم كاملاً",
+
+  // Lecture en direct (enseignant)
+  "Échec de l'envoi.": "فشل الإرسال.",
+  "🔴 En direct": "🔴 مباشر",
+  "Arrêter le direct": "إيقاف البث المباشر",
+  "Titre (ex. Sourate Al-Baqara, verset 255)": "العنوان (مثال: سورة البقرة، الآية 255)",
+  "Le texte ou l'extrait que la classe suit en ce moment…": "النص أو المقتطف الذي يتابعه الفصل الآن…",
+  "📎 Joindre une image/fichier": "📎 إرفاق صورة/ملف",
+  "⏹ Arrêter l'enregistrement": "⏹ إيقاف التسجيل",
+  "🎙️ Message vocal": "🎙️ رسالة صوتية",
+  "Micro indisponible ou accès refusé.": "الميكروفون غير متاح أو تمّ رفض الإذن.",
+  "Publication…": "جارٍ النشر…",
+  "Mettre à jour": "تحديث",
+  "Publier en direct": "نشر مباشر",
+
+  // Audio en direct (enseignant)
+  "Échec de la connexion audio.": "فشل الاتصال الصوتي.",
+  "🎙️ Micro en direct": "🎙️ الميكروفون مباشر",
+  "Audio en direct": "الصوت المباشر",
+  "Les élèves connectés vous entendent": "التلاميذ المتصلون يسمعونكم",
+  "Diffusez votre voix aux élèves connectés": "بثّ صوتكم إلى التلاميذ المتصلين",
+  "Erreur": "خطأ",
+  "Arrêter": "إيقاف",
+  "Démarrer l'audio": "بدء البث الصوتي",
+  "🎧 Enregistrements ({n})": "🎧 التسجيلات ({n})",
+
+  // Audio + lecture en direct (élève)
+  "🔴 Lecture en direct": "🔴 نشر مباشر",
+  "Fichier joint": "ملف مرفق",
+  "🔊 Audio en direct disponible": "🔊 صوت مباشر متاح",
+  "En écoute": "قيد الاستماع",
+  "L'enseignant parle en direct": "المعلّم يتحدث مباشرة",
+  "Quitter": "مغادرة",
+  "Rejoindre": "انضمام",
+  "Envoi de l'enregistrement…": "جارٍ إرسال التسجيل…",
+  "🔴 Enregistrer ce direct": "🔴 تسجيل هذا البث المباشر",
+  "Échec de l'enregistrement.": "فشل التسجيل.",
+
   // Guide (masthead partagé avec /guide, voir aussi guide-*.html)
   "Guide d'utilisation complet de Madrasa CI pour enseignants, élèves et fédérations d'écoles.":
     "دليل استخدام شامل لتطبيق Madrasa CI موجّه للمعلمين والتلاميذ واتحادات المدارس.",

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { subscribeLiveReading } from "@/lib/data/liveReading";
 import { uploadClassRecording } from "@/lib/data/recordings";
 import { getStudentAudioToken } from "@/app/actions/live-audio";
+import { useLocale } from "@/components/locale-provider";
 
 type Status = "idle" | "connecting" | "listening" | "error";
 
@@ -26,6 +27,7 @@ export default function AudioListen({
   studentName: string;
 }) {
   const router = useRouter();
+  const { t } = useLocale();
   const [active, setActive] = useState(initialActive);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +81,7 @@ export default function AudioListen({
       roomRef.current = room;
       setStatus("listening");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Échec de la connexion audio.");
+      setError(e instanceof Error ? e.message : t("Échec de la connexion audio."));
       setStatus("error");
     }
   }
@@ -123,7 +125,7 @@ export default function AudioListen({
       await uploadClassRecording(supabase, classId, blob, studentName);
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Échec de l'enregistrement.");
+      setError(e instanceof Error ? e.message : t("Échec de l'enregistrement."));
     } finally {
       setUploadingRecording(false);
     }
@@ -135,14 +137,14 @@ export default function AudioListen({
     <div className="flex flex-col gap-2.5 rounded-xl border border-green bg-[#F2F7F3] px-3.5 py-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-0.5">
-          <div className="text-sm font-semibold text-green">🔊 Audio en direct disponible</div>
+          <div className="text-sm font-semibold text-green">{t("🔊 Audio en direct disponible")}</div>
           <div className="text-xs text-ink-muted">
-            {status === "listening" ? "En écoute" : status === "error" ? (error ?? "Erreur") : "L'enseignant parle en direct"}
+            {status === "listening" ? t("En écoute") : status === "error" ? (error ?? t("Erreur")) : t("L'enseignant parle en direct")}
           </div>
         </div>
         {status === "listening" ? (
           <button onClick={leave} className="rounded-lg border border-border-input bg-white px-3.5 py-2 text-xs font-semibold text-ink-soft">
-            Quitter
+            {t("Quitter")}
           </button>
         ) : (
           <button
@@ -150,7 +152,7 @@ export default function AudioListen({
             disabled={status === "connecting"}
             className="rounded-lg bg-green px-3.5 py-2 text-xs font-semibold text-card-alt disabled:opacity-60"
           >
-            {status === "connecting" ? "…" : "Rejoindre"}
+            {status === "connecting" ? "…" : t("Rejoindre")}
           </button>
         )}
       </div>
@@ -163,7 +165,7 @@ export default function AudioListen({
             recording ? "border-terracotta bg-terracotta text-card-alt" : "border-dashed border-border-input bg-white text-ink-soft"
           } disabled:opacity-60`}
         >
-          {uploadingRecording ? "Envoi de l'enregistrement…" : recording ? "⏹ Arrêter l'enregistrement" : "🔴 Enregistrer ce direct"}
+          {uploadingRecording ? t("Envoi de l'enregistrement…") : recording ? t("⏹ Arrêter l'enregistrement") : t("🔴 Enregistrer ce direct")}
         </button>
       )}
 

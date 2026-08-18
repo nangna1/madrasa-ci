@@ -4,12 +4,14 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data/profile";
 import { getMyClass, getScheduleSlots } from "@/lib/data/classes";
 import { getSubjectsCatalog, getClassSubjects } from "@/lib/data/subjects";
+import { getT } from "@/lib/i18n/server";
 import EmploiDuTempsView from "./emploi-du-temps-view";
 
 export default async function EmploiDuTempsPage() {
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
+  const { t } = await getT();
 
   const myClass = await getMyClass(supabase);
   if (!myClass) redirect("/login");
@@ -23,11 +25,11 @@ export default async function EmploiDuTempsPage() {
   return (
     <div className="flex flex-col gap-4">
       <Link href="/teacher" className="text-[13px] text-ink-muted">
-        ‹ Retour
+        {t("‹ Retour")}
       </Link>
 
       <div className="flex flex-col gap-0.5">
-        <div className="font-serif text-2xl font-semibold text-ink">Emploi du temps</div>
+        <div className="font-serif text-2xl font-semibold text-ink">{t("Emploi du temps")}</div>
         <div className="text-[13px] text-ink-muted">{myClass.name}</div>
       </div>
 

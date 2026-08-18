@@ -10,6 +10,7 @@ import {
   getLiveAttachmentUrl,
   type LiveReading,
 } from "@/lib/data/liveReading";
+import { useLocale } from "@/components/locale-provider";
 
 type Attachment = { path: string; name: string; type: string };
 
@@ -26,6 +27,7 @@ export default function LiveReadingControl({
   classId: string;
   initialReading: LiveReading | null;
 }) {
+  const { t } = useLocale();
   const [live, setLive] = useState(Boolean(initialReading?.content || initialReading?.attachment_path));
   const [title, setTitle] = useState(initialReading?.title ?? "");
   const [content, setContent] = useState(initialReading?.content ?? "");
@@ -52,7 +54,7 @@ export default function LiveReadingControl({
       setAttachment(uploaded);
       setLive(true);
     } catch (err) {
-      setAttachmentError(err instanceof Error ? err.message : "Échec de l'envoi.");
+      setAttachmentError(err instanceof Error ? err.message : t("Échec de l'envoi."));
     } finally {
       setUploading(false);
     }
@@ -87,7 +89,7 @@ export default function LiveReadingControl({
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
       recorder.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
+        stream.getTracks().forEach((tr) => tr.stop());
         const mimeType = recorder.mimeType || "audio/webm";
         const ext = mimeType.includes("mp4") ? "m4a" : "webm";
         const blob = new Blob(chunksRef.current, { type: mimeType });
@@ -97,7 +99,7 @@ export default function LiveReadingControl({
       mediaRecorderRef.current = recorder;
       setRecording(true);
     } catch {
-      setAttachmentError("Micro indisponible ou accès refusé.");
+      setAttachmentError(t("Micro indisponible ou accès refusé."));
     }
   }
 
@@ -134,11 +136,11 @@ export default function LiveReadingControl({
     <div className="flex flex-col gap-2.5 rounded-xl border border-green bg-[#F2F7F3] p-3.5">
       <div className="flex items-center justify-between">
         <div className="text-xs font-semibold uppercase tracking-[0.1em] text-green">
-          {live ? "🔴 En direct" : "Lecture en direct"}
+          {live ? t("🔴 En direct") : t("Lecture en direct")}
         </div>
         {live && (
           <button onClick={handleStop} disabled={saving} className="text-xs text-terracotta">
-            Arrêter le direct
+            {t("Arrêter le direct")}
           </button>
         )}
       </div>
@@ -147,7 +149,7 @@ export default function LiveReadingControl({
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Titre (ex. Sourate Al-Baqara, verset 255)"
+        placeholder={t("Titre (ex. Sourate Al-Baqara, verset 255)")}
         className="rounded-lg border border-border-input bg-white px-2.5 py-2 text-sm text-ink"
       />
       <textarea
@@ -155,7 +157,7 @@ export default function LiveReadingControl({
         onChange={(e) => setContent(e.target.value)}
         rows={5}
         dir="auto"
-        placeholder="Le texte ou l'extrait que la classe suit en ce moment…"
+        placeholder={t("Le texte ou l'extrait que la classe suit en ce moment…")}
         className="font-arabic resize-y rounded-lg border border-border-input bg-white px-2.5 py-2 text-base leading-relaxed text-ink"
       />
 
@@ -170,13 +172,13 @@ export default function LiveReadingControl({
           )}
           {!isAudio && <div className="flex-1 truncate text-xs text-ink-soft">{attachment.name}</div>}
           <button onClick={handleRemoveAttachment} className="text-xs text-terracotta">
-            Retirer
+            {t("Retirer")}
           </button>
         </div>
       ) : (
         <div className="flex gap-2">
           <label className="flex-1 cursor-pointer rounded-lg border border-dashed border-border-input bg-white px-2.5 py-2.5 text-center text-xs font-semibold text-ink-muted">
-            {uploading ? "Envoi…" : "📎 Joindre une image/fichier"}
+            {uploading ? t("Envoi…") : t("📎 Joindre une image/fichier")}
             <input type="file" onChange={(e) => void handleFile(e)} disabled={uploading || recording} className="hidden" />
           </label>
           <button
@@ -186,7 +188,7 @@ export default function LiveReadingControl({
               recording ? "border-terracotta bg-terracotta text-card-alt" : "border-dashed border-border-input bg-white text-ink-muted"
             }`}
           >
-            {recording ? "⏹ Arrêter l'enregistrement" : "🎙️ Message vocal"}
+            {recording ? t("⏹ Arrêter l'enregistrement") : t("🎙️ Message vocal")}
           </button>
         </div>
       )}
@@ -197,7 +199,7 @@ export default function LiveReadingControl({
         disabled={saving || !content.trim()}
         className="rounded-lg bg-green py-2.5 text-sm font-semibold text-card-alt disabled:opacity-40"
       >
-        {saving ? "Publication…" : live ? "Mettre à jour" : "Publier en direct"}
+        {saving ? t("Publication…") : live ? t("Mettre à jour") : t("Publier en direct")}
       </button>
     </div>
   );

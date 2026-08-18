@@ -5,6 +5,7 @@ import { getStudent } from "@/lib/data/students";
 import { getPaymentsForPeriod, currentPeriod } from "@/lib/data/payments";
 import { getSourates, getProgressForStudent, TOTAL_SOURATES } from "@/lib/data/memorization";
 import { getMyClass } from "@/lib/data/classes";
+import { getT } from "@/lib/i18n/server";
 import StudentDetail from "./student-detail";
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +13,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const supabase = await createClient();
   const profile = await getCurrentProfile(supabase);
   if (!profile?.school_id) redirect("/login");
+
+  const { t } = await getT();
 
   const myClass = await getMyClass(supabase);
   if (!myClass) redirect("/login");
@@ -37,7 +40,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         id: student.id,
         fullName: student.full_name,
         nameAr: student.name_ar,
-        meta: `${myClass.name} · ${student.age ?? "?"} ans`,
+        meta: t("{class} · {age} ans", { class: myClass.name, age: student.age ?? "?" }),
       }}
       sourates={sourates.map((s) => ({
         id: s.id,
