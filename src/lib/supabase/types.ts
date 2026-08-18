@@ -9,6 +9,7 @@ export type ProfileRole = "teacher" | "federation_admin";
 export type MemoStatus = "todo" | "wip" | "ok";
 export type PaymentStatus = "paid" | "unpaid";
 export type MessageStatus = "draft" | "sent" | "failed";
+export type SubjectCategory = "coranique" | "national";
 
 export interface Database {
   public: {
@@ -84,6 +85,7 @@ export interface Database {
           jour: number;
           heure_debut: string;
           heure_fin: string;
+          subject_code: string | null;
         };
         Insert: Partial<Database["public"]["Tables"]["class_schedule_slots"]["Row"]> & {
           class_id: string;
@@ -92,7 +94,50 @@ export interface Database {
           heure_fin: string;
         };
         Update: Partial<Database["public"]["Tables"]["class_schedule_slots"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "class_schedule_slots_subject_code_fkey";
+            columns: ["subject_code"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
+            referencedColumns: ["code"];
+          },
+        ];
+      };
+      subjects: {
+        Row: {
+          code: string;
+          name: string;
+          name_ar: string | null;
+          category: SubjectCategory;
+          sort_order: number;
+        };
+        Insert: Database["public"]["Tables"]["subjects"]["Row"];
+        Update: Partial<Database["public"]["Tables"]["subjects"]["Row"]>;
         Relationships: [];
+      };
+      class_subjects: {
+        Row: {
+          id: string;
+          class_id: string;
+          subject_code: string;
+          teacher_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["class_subjects"]["Row"]> & {
+          class_id: string;
+          subject_code: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["class_subjects"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "class_subjects_subject_code_fkey";
+            columns: ["subject_code"];
+            isOneToOne: false;
+            referencedRelation: "subjects";
+            referencedColumns: ["code"];
+          },
+        ];
       };
       students: {
         Row: {

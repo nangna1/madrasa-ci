@@ -1,8 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
+import type { Subject } from "@/lib/data/subjects";
 
 export type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
 export type ScheduleSlot = Database["public"]["Tables"]["class_schedule_slots"]["Row"];
+export type ScheduleSlotWithSubject = ScheduleSlot & { subject: Subject | null };
 
 export const JOURS_SEMAINE = [
   "", // 0 inutilisé (jour va de 1 à 7)
@@ -27,15 +29,34 @@ export async function getMyClass(supabase: SupabaseClient<Database>): Promise<Cl
 export async function getScheduleSlots(
   supabase: SupabaseClient<Database>,
   classId: string,
-): Promise<ScheduleSlot[]> {
+): Promise<ScheduleSlotWithSubject[]> {
   const { data, error } = await supabase
     .from("class_schedule_slots")
-    .select("*")
+    .select("*, subject:subjects(*)")
     .eq("class_id", classId)
     .order("jour", { ascending: true })
     .order("heure_debut", { ascending: true });
   if (error) throw error;
-  return data;
+  return data as unknown as ScheduleSlotWithSubject[];
+}
+
+export async function addScheduleSlot(
+  supabase: SupabaseClient<Database>,
+  input: { classId: string; jour: number; heureDebut: string; heureFin: string; subjectCode: string | null },
+): Promise<void> {
+  const { error } = await supabase.from("class_schedule_slots").insert({
+    class_id: input.classId,
+    jour: input.jour,
+    heure_debut: input.heureDebut,
+    heure_fin: input.heureFin,
+    subject_code: input.subjectCode,
+  });
+  if (error) throw error;
+}
+
+export async function removeScheduleSlot(supabase: SupabaseClient<Database>, slotId: string): Promise<void> {
+  const { error } = await supabase.from("class_schedule_slots").delete().eq("id", slotId);
+  if (error) throw error;
 }
 
 export function formatHeure(t: string): string {

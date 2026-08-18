@@ -7,7 +7,9 @@ implémentation Next.js à partir des maquettes Claude Design du dossier
 Deux interfaces dans une seule codebase :
 
 - **App enseignant** (`/teacher`) — mobile-first : effectifs, appel, suivi
-  de mémorisation sourate par sourate, mensualités, messages parents.
+  de mémorisation sourate par sourate, mensualités, messages parents,
+  matières et emploi du temps réels (catalogue de matières coraniques et
+  programme national ivoirien, composé librement par classe).
 - **Dashboard fédération** (`/federation`) — vue d'ensemble du réseau,
   écoles membres, dossier de plaidoyer d'intégration.
 
@@ -16,7 +18,10 @@ Deux interfaces dans une seule codebase :
 1. Créez un projet gratuit sur [supabase.com](https://supabase.com).
 2. Dans **SQL Editor**, exécutez dans l'ordre :
    - `supabase/migrations/0001_init.sql` (schéma + RLS)
+   - `supabase/migrations/0002_classes.sql` (classes, emploi du temps, plusieurs enseignants par école)
+   - `supabase/migrations/0003_subjects.sql` (catalogue de matières réelles — coraniques et programme national ivoirien)
    - `supabase/seed.sql` (données de démo : fédération OEECI, 10 écoles, 10 élèves à la Médersa An-Nour)
+   - `supabase/seed_classes_followup.sql` (sur un projet déjà seedé avant 0002 : rattache le compte enseignant de démo à une classe)
 3. Copiez `.env.example` vers `.env.local` et renseignez l'URL et la clé anonyme
    du projet (**Project Settings → API**).
 
