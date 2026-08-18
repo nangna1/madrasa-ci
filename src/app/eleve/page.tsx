@@ -5,6 +5,8 @@ import { getStudent } from "@/lib/data/students";
 import { getSourates, getProgressForStudent, TOTAL_SOURATES } from "@/lib/data/memorization";
 import { getMonthAttendanceSummary } from "@/lib/data/attendance";
 import { getPaymentsForPeriod, currentPeriod, formatFcfa } from "@/lib/data/payments";
+import { getLiveReading } from "@/lib/data/liveReading";
+import LiveReadingView from "./live-reading-view";
 
 const BADGE: Record<string, { label: string; bg: string; fg: string }> = {
   ok: { label: "Mémorisé", bg: "var(--color-green-tint)", fg: "var(--color-green)" },
@@ -21,7 +23,7 @@ export default async function EleveHomePage() {
   if (!student) redirect("/login");
 
   const period = currentPeriod();
-  const [sourates, progress, attendanceSummary, payments, classRow] = await Promise.all([
+  const [sourates, progress, attendanceSummary, payments, classRow, liveReading] = await Promise.all([
     getSourates(supabase),
     getProgressForStudent(supabase, profile.student_id),
     getMonthAttendanceSummary(supabase, profile.student_id),
@@ -29,6 +31,7 @@ export default async function EleveHomePage() {
     student.class_id
       ? supabase.from("classes").select("name").eq("id", student.class_id).maybeSingle()
       : Promise.resolve({ data: null }),
+    student.class_id ? getLiveReading(supabase, student.class_id) : Promise.resolve(null),
   ]);
 
   const memoCount = [...progress.values()].filter((s) => s === "ok").length;
@@ -48,6 +51,10 @@ export default async function EleveHomePage() {
         )}
         <div className="text-[13px] text-ink-muted">{classRow?.data?.name ?? "Classe non assignée"}</div>
       </div>
+
+      {student.class_id && (
+        <LiveReadingView classId={student.class_id} sourates={sourates} initialReading={liveReading} />
+      )}
 
       <div className="flex flex-col gap-2.5 rounded-[14px] bg-green p-4 text-card-alt">
         <div className="text-xs uppercase tracking-[0.1em] text-white/70">Mémorisation du Coran</div>

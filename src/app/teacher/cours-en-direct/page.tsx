@@ -6,7 +6,9 @@ import { getMyClass, getScheduleSlots, formatHeure, jourIsoAujourdhui } from "@/
 import { getStudents, initials } from "@/lib/data/students";
 import { getAttendanceForDate, todayISO } from "@/lib/data/attendance";
 import { getSourates, getProgressRows, nextSourateFor } from "@/lib/data/memorization";
+import { getLiveReading } from "@/lib/data/liveReading";
 import CoursEnDirectView from "./cours-en-direct-view";
+import LiveReadingControl from "./live-reading-control";
 
 export default async function CoursEnDirectPage() {
   const supabase = await createClient();
@@ -24,9 +26,10 @@ export default async function CoursEnDirectPage() {
   const studentIds = students.map((s) => s.id);
   const date = todayISO();
 
-  const [attendance, progressRows] = await Promise.all([
+  const [attendance, progressRows, liveReading] = await Promise.all([
     getAttendanceForDate(supabase, studentIds, date),
     getProgressRows(supabase, studentIds),
+    getLiveReading(supabase, myClass.id),
   ]);
 
   const rows = students.map((s) => {
@@ -69,6 +72,8 @@ export default async function CoursEnDirectPage() {
             : " · pas de créneau aujourd'hui"}
         </div>
       </div>
+
+      <LiveReadingControl classId={myClass.id} sourates={sourates} initialReading={liveReading} />
 
       <CoursEnDirectView students={rows} date={date} />
     </div>
