@@ -102,11 +102,12 @@ Fonctionnement :
   numéros de reçu) sont explicitement forcés avec `dir="ltr"`. Le français et
   l'anglais restent tous deux en LTR/police latine.
 - Un guide d'utilisation complet est disponible dans l'app (`/guide`,
-  accessible depuis chaque en-tête), lui aussi trilingue. Deux documents
-  autonomes (français et arabe) existent également en dehors de l'app, au
-  format PDF, dans [`docs/`](./docs) : [`Guide-Madrasa-CI-FR.pdf`](./docs/Guide-Madrasa-CI-FR.pdf)
-  et [`Guide-Madrasa-CI-AR.pdf`](./docs/Guide-Madrasa-CI-AR.pdf) — encore sous
-  l'ancien nom du projet et sans version anglaise, à régénérer.
+  accessible depuis chaque en-tête), lui aussi trilingue. Trois documents
+  autonomes existent également en dehors de l'app, au format PDF, dans
+  [`docs/`](./docs) : [`Guide-Scolaris-FR.pdf`](./docs/Guide-Scolaris-FR.pdf),
+  [`Guide-Scolaris-AR.pdf`](./docs/Guide-Scolaris-AR.pdf) et
+  [`Guide-Scolaris-EN.pdf`](./docs/Guide-Scolaris-EN.pdf) — mêmes 12 sections
+  que le guide intégré, mise en page imprimable.
 
 ## Comptes élève
 
