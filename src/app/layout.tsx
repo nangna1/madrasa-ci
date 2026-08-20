@@ -17,8 +17,8 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Madrasa CI",
-  description: "Gestion des écoles coraniques et médersas de Côte d'Ivoire",
+  title: "Scolaris",
+  description: "Gestion scolaire pour écoles et fédérations d'écoles de Côte d'Ivoire",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

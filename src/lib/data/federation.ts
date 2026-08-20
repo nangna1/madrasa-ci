@@ -189,7 +189,7 @@ export async function getAdvocacyData(supabase: SupabaseClient<Database>, t: Tra
 
   return {
     rows: [
-      { label: t("Écoles membres"), value: String(schools.length), source: t("Écoles enregistrées Madrasa CI") },
+      { label: t("Écoles membres"), value: String(schools.length), source: t("Écoles enregistrées Scolaris") },
       { label: t("Élèves suivis"), value: String(students.length), source: t("Effectifs synchronisés") },
       {
         label: t("Élèves avec dossier de mémorisation"),

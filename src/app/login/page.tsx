@@ -46,7 +46,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-[0_24px_60px_rgba(38,30,16,0.12)]">
         <div className="mb-6 flex flex-col items-center gap-1 text-center">
-          <div className="font-serif text-2xl font-semibold text-ink">Madrasa CI</div>
+          <div className="font-serif text-2xl font-semibold text-ink">Scolaris</div>
           <div className="text-xs uppercase tracking-[0.14em] text-ink-faint">{t("Connexion")}</div>
         </div>
 

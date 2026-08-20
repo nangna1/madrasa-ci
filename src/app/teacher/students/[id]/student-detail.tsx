@@ -200,7 +200,7 @@ export default function StudentDetail({
             {parentPhone && (
               <a
                 href={`https://wa.me/${toWhatsAppNumber(parentPhone)}?text=${encodeURIComponent(
-                  t("Madrasa CI — accès de {name} : ouvrez le lien de connexion élève et entrez ce code : {code}", {
+                  t("Scolaris — accès de {name} : ouvrez le lien de connexion élève et entrez ce code : {code}", {
                     name: student.fullName,
                     code: access.code,
                   }),

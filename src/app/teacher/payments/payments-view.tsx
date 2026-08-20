@@ -9,6 +9,7 @@ import { sendParentMessage } from "@/lib/data/messages";
 import { useOffline } from "@/lib/offline/offline-context";
 import { useLocale } from "@/components/locale-provider";
 import { Toast, useToast } from "@/components/toast";
+import { intlTag } from "@/lib/i18n/types";
 
 interface Row {
   id: string;
@@ -120,7 +121,7 @@ export default function PaymentsView({
             { k: t("Période"), v: period },
             { k: t("Montant"), v: formatFcfa(fee) },
             { k: t("Moyen"), v: target.payment?.method ?? t("Mobile money") },
-            { k: t("Date"), v: new Date().toLocaleDateString(locale === "ar" ? "ar" : "fr-FR") },
+            { k: t("Date"), v: new Date().toLocaleDateString(intlTag(locale)) },
           ],
         });
       },

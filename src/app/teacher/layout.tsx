@@ -9,7 +9,7 @@ import NoClassAssigned from "./no-class-assigned";
 
 export const metadata: Metadata = {
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Madrasa CI" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Scolaris" },
 };
 
 export const viewport: Viewport = {

@@ -1,7 +1,7 @@
 {
-  "name": "Madrasa CI — App enseignant",
-  "short_name": "Madrasa CI",
-  "description": "Effectifs, appel, mémorisation, mensualités et messages parents pour les écoles coraniques et médersas.",
+  "name": "Scolaris — App enseignant",
+  "short_name": "Scolaris",
+  "description": "Effectifs, appel, mémorisation, mensualités et messages parents pour les écoles.",
   "start_url": "/teacher",
   "scope": "/teacher",
   "display": "standalone",

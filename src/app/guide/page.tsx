@@ -50,10 +50,10 @@ export default async function GuidePage() {
 
         <header className="mb-8 mt-4 border-b border-border pb-8">
           <div className="mb-2 text-[12px] font-bold uppercase tracking-[0.1em] text-green">{t("Guide d'utilisation")}</div>
-          <h1 className="font-serif mb-3 text-3xl font-bold text-green-deep">Madrasa CI</h1>
+          <h1 className="font-serif mb-3 text-3xl font-bold text-green-deep">Scolaris</h1>
           <p className="max-w-[58ch] text-[15px] text-ink-soft">
             {t(
-              "Gestion quotidienne des écoles coraniques et médersas — suivi des élèves, mémorisation du Coran, présence, mensualités, communication avec les parents et cours en direct.",
+              "Gestion quotidienne des écoles — suivi des élèves, présence, mensualités, mémorisation (Coran ou tout autre programme), communication avec les parents et cours en direct.",
             )}
           </p>
         </header>
@@ -220,7 +220,7 @@ export default async function GuidePage() {
         </section>
 
         <footer className="flex justify-between border-t border-border pt-5 text-xs text-ink-faint">
-          <span>{t("Madrasa CI — guide d'utilisation")}</span>
+          <span>{t("Scolaris — guide d'utilisation")}</span>
           <span>{t("Version française")}</span>
         </footer>
       </div>

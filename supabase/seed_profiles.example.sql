@@ -15,7 +15,7 @@ values (
   '00000000-0000-0000-0000-000000000101'
 );
 
--- Compte admin fédération, rattaché à l'OEECI · Madrasa CI :
+-- Compte admin fédération, rattaché à l'OEECI · Scolaris :
 insert into public.profiles (id, role, full_name, phone, federation_id)
 values (
   'REMPLACER-PAR-UUID-AUTH-USER',

@@ -8,6 +8,7 @@ import { getPaymentsForPeriod, currentPeriod, formatFcfa, MONTHLY_FEE } from "@/
 import { getProgressCounts, TOTAL_SOURATES } from "@/lib/data/memorization";
 import { getMyClass, getScheduleSlots, formatHeure, jourIsoAujourdhui } from "@/lib/data/classes";
 import { getT } from "@/lib/i18n/server";
+import { intlTag } from "@/lib/i18n/types";
 
 export default async function TeacherHomePage() {
   const supabase = await createClient();
@@ -79,7 +80,7 @@ export default async function TeacherHomePage() {
     },
   ].filter((t) => t.show);
 
-  const today = new Date().toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", {
+  const today = new Date().toLocaleDateString(intlTag(locale), {
     weekday: "long",
     day: "numeric",
     month: "long",

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { getRecordingUrl, type Recording } from "@/lib/data/recordings";
 import { useLocale } from "@/components/locale-provider";
+import { intlTag } from "@/lib/i18n/types";
 
 // Liste des enregistrements du direct pour une classe — alimentée par les
 // élèves (voir audio-listen.tsx), consultable aussi bien côté élève que
@@ -25,7 +26,7 @@ export default function RecordingsList({ recordings }: { recordings: Recording[]
             <div className="flex items-baseline justify-between text-[11px] text-ink-faint">
               <span>{r.recorded_by_name ?? t("Élève")}</span>
               <span>
-                {new Date(r.created_at).toLocaleString(locale === "ar" ? "ar" : "fr-FR", {
+                {new Date(r.created_at).toLocaleString(intlTag(locale), {
                   day: "numeric",
                   month: "short",
                   hour: "2-digit",

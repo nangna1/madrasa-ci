@@ -1,8 +1,10 @@
-# Madrasa CI
+# Scolaris
 
-App de gestion pour les écoles coraniques et médersas de Côte d'Ivoire —
-implémentation Next.js à partir des maquettes Claude Design du dossier
-`../cr-ation-d-un-saas/` (conservé comme référence visuelle).
+App de gestion scolaire pour écoles et fédérations d'écoles de Côte d'Ivoire
+(anciennement « Madrasa CI » — renommé pour refléter une portée générale,
+au-delà des seules écoles coraniques et médersas) — implémentation Next.js à
+partir des maquettes Claude Design du dossier `../cr-ation-d-un-saas/`
+(conservé comme référence visuelle).
 
 Trois interfaces dans une seule codebase :
 
@@ -59,7 +61,7 @@ Supabase Auth). Pour chaque compte de test :
 2. Copiez l'UUID généré.
 3. Adaptez et exécutez `supabase/seed_profiles.example.sql` (dans le SQL Editor) pour relier ce
    compte à un rôle (`teacher` rattaché à la Médersa An-Nour, ou `federation_admin`
-   rattaché à l'OEECI · Madrasa CI).
+   rattaché à l'OEECI · Scolaris).
 
 ## 3. Lancer l'app
 
@@ -74,35 +76,37 @@ puis vers `/teacher` ou `/federation` selon le rôle du compte connecté.
 **Important** : sans projet Supabase configuré (étapes 1-2), l'app ne rend rien —
 l'authentification est vérifiée sur chaque requête (`src/proxy.ts`), y compris `/login`.
 
-## Application bilingue (français / arabe)
+## Application trilingue (français / arabe / anglais)
 
 Les trois espaces (enseignant, élève, fédération) et la page de connexion
-sont bilingues. Un bouton de bascule (`LanguageToggle`, visible dans chaque
+sont trilingues. Un bouton de bascule (`LanguageToggle`, visible dans chaque
 en-tête) permet de changer de langue à tout moment, sans lien avec le
 compte — ce n'est pas un choix fait à la création du compte, chacun peut
-basculer librement à chaque session.
+basculer librement à chaque session (cycle FR → AR → EN → FR).
 
 Fonctionnement :
 
-- `src/lib/i18n/dictionary.ts` + `src/lib/i18n/ar.ts` : un dictionnaire
-  façon gettext où le texte français affiché sert lui-même de clé vers sa
-  traduction arabe. Un texte absent du dictionnaire s'affiche simplement en
-  français — l'app ne casse jamais en mode arabe, elle a juste des trous de
-  traduction ponctuels si un texte a été oublié.
-- La langue choisie est stockée dans un cookie (`madrasa_locale`, pas de
+- `src/lib/i18n/dictionary.ts` + `src/lib/i18n/ar.ts` + `src/lib/i18n/en.ts` :
+  un dictionnaire façon gettext où le texte français affiché sert lui-même
+  de clé vers sa traduction. Un texte absent d'un dictionnaire s'affiche
+  simplement en français — l'app ne casse jamais dans une langue non
+  française, elle a juste des trous de traduction ponctuels si un texte a
+  été oublié (même périmètre de clés pour l'arabe et l'anglais aujourd'hui).
+- La langue choisie est stockée dans un cookie (`scolaris_locale`, pas de
   routage par préfixe d'URL type `/ar/...`). `src/lib/i18n/server.ts`
   (`getT()`) lit ce cookie côté serveur ; `src/components/locale-provider.tsx`
   (`useLocale()`) l'expose côté client.
 - En arabe, `src/app/layout.tsx` bascule tout le document en
   `dir="rtl"`/`lang="ar"` et en police Noto Naskh Arabic (`font-arabic`) ;
   quelques éléments qui doivent rester en LTR même en arabe (codes élève,
-  numéros de reçu) sont explicitement forcés avec `dir="ltr"`.
+  numéros de reçu) sont explicitement forcés avec `dir="ltr"`. Le français et
+  l'anglais restent tous deux en LTR/police latine.
 - Un guide d'utilisation complet est disponible dans l'app (`/guide`,
-  accessible depuis chaque en-tête), lui aussi bilingue. Deux documents
+  accessible depuis chaque en-tête), lui aussi trilingue. Deux documents
   autonomes (français et arabe) existent également en dehors de l'app, au
   format PDF, dans [`docs/`](./docs) : [`Guide-Madrasa-CI-FR.pdf`](./docs/Guide-Madrasa-CI-FR.pdf)
-  et [`Guide-Madrasa-CI-AR.pdf`](./docs/Guide-Madrasa-CI-AR.pdf) — mêmes
-  12 sections que le guide intégré, mise en page imprimable.
+  et [`Guide-Madrasa-CI-AR.pdf`](./docs/Guide-Madrasa-CI-AR.pdf) — encore sous
+  l'ancien nom du projet et sans version anglaise, à régénérer.
 
 ## Comptes élève
 

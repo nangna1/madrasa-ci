@@ -48,7 +48,7 @@ export const ar: Record<string, string> = {
   "en attente d'envoi": "في انتظار الإرسال",
 
   // Coque élève
-  "Espace élève · Madrasa CI": "فضاء التلميذ · Madrasa CI",
+  "Espace élève · Scolaris": "فضاء التلميذ · Scolaris",
   "Guide d'utilisation": "دليل الاستخدام",
 
   // Coque fédération
@@ -58,7 +58,7 @@ export const ar: Record<string, string> = {
   "Tableau de bord agrégé · réseau d'écoles membres": "لوحة تحكم مجمّعة · شبكة المدارس الأعضاء",
   "Plaidoyer intégration": "الدعوة إلى الاندماج",
   "des écoles du réseau intégrées au système national": "من مدارس الشبكة مندمجة في النظام الوطني",
-  "Réseau Madrasa CI · toutes fédérations": "شبكة Madrasa CI · جميع الاتحادات",
+  "Réseau Scolaris · toutes fédérations": "شبكة Scolaris · جميع الاتحادات",
 
   // Accueil enseignant
   "Aujourd'hui": "اليوم",
@@ -203,8 +203,8 @@ export const ar: Record<string, string> = {
   "Accès élève": "وصول التلميذ",
   "Actif": "نشط",
   "Code d'accès — à noter, affiché une seule fois": "رمز الدخول — دوّنوه، يظهر مرة واحدة فقط",
-  "Madrasa CI — accès de {name} : ouvrez le lien de connexion élève et entrez ce code : {code}":
-    "Madrasa CI — وصول {name} : افتحوا رابط دخول التلميذ وأدخلوا هذا الرمز: {code}",
+  "Scolaris — accès de {name} : ouvrez le lien de connexion élève et entrez ce code : {code}":
+    "Scolaris — وصول {name} : افتحوا رابط دخول التلميذ وأدخلوا هذا الرمز: {code}",
   "Envoyer le code par WhatsApp": "إرسال الرمز عبر واتساب",
   "Un code déjà transmis reste valable — n'en générez un nouveau que s'il a été perdu.":
     "الرمز المُرسَل سابقاً لا يزال صالحاً — لا تُنشئوا رمزاً جديداً إلا في حال ضياعه.",
@@ -315,8 +315,8 @@ export const ar: Record<string, string> = {
   "Générer le dossier PDF": "إنشاء الملف بصيغة PDF",
 
   // Guide d'utilisation intégré
-  "Gestion quotidienne des écoles coraniques et médersas — suivi des élèves, mémorisation du Coran, présence, mensualités, communication avec les parents et cours en direct.":
-    "إدارة يومية للمدارس القرآنية والمدارس الإسلامية — متابعة التلاميذ، حفظ القرآن الكريم، الحضور، الرسوم الشهرية، التواصل مع أولياء الأمور والدرس المباشر.",
+  "Gestion quotidienne des écoles — suivi des élèves, présence, mensualités, mémorisation (Coran ou tout autre programme), communication avec les parents et cours en direct.":
+    "إدارة يومية للمدارس — متابعة التلاميذ، الحضور، الرسوم الشهرية، الحفظ (القرآن الكريم أو أي برنامج آخر)، التواصل مع أولياء الأمور والدرس المباشر.",
   "Sommaire": "الفهرس",
   "1. Se connecter": "1. تسجيل الدخول",
   "Accueil enseignant": "الصفحة الرئيسية للمعلّم",
@@ -407,10 +407,10 @@ export const ar: Record<string, string> = {
     "التحقق مما إذا كانت الحالة «قيد الانتظار» — الضغط على تأكيد الاستلام.",
   "Rien ne s'affiche côté élève pendant le direct": "لا يظهر شيء لدى التلميذ أثناء البث المباشر",
   "Vérifier côté enseignant que le statut affiche bien « En direct ».": "التحقق لدى المعلّم من أن الحالة تُظهر «مباشر».",
-  "Madrasa CI — guide d'utilisation": "Madrasa CI — دليل الاستخدام",
+  "Scolaris — guide d'utilisation": "Scolaris — دليل الاستخدام",
   "Version française": "النسخة العربية",
 
   // Guide (masthead partagé avec /guide, voir aussi guide-*.html)
-  "Guide d'utilisation complet de Madrasa CI pour enseignants, élèves et fédérations d'écoles.":
-    "دليل استخدام شامل لتطبيق Madrasa CI موجّه للمعلمين والتلاميذ واتحادات المدارس.",
+  "Guide d'utilisation complet de Scolaris pour enseignants, élèves et fédérations d'écoles.":
+    "دليل استخدام شامل لتطبيق Scolaris موجّه للمعلمين والتلاميذ واتحادات المدارس.",
 };

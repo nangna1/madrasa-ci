@@ -10,7 +10,7 @@
 // est gérée séparément dans src/lib/offline/ (IndexedDB), pas ici : ce
 // service worker ne fait que du cache de lecture, jamais d'écriture.
 
-const CACHE_NAME = "madrasa-ci-v1";
+const CACHE_NAME = "scolaris-v1";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

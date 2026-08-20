@@ -1,4 +1,4 @@
--- Madrasa CI — données de démo
+-- Scolaris — données de démo
 -- Reprend les données d'exemple des prototypes Claude Design
 -- (STUDENTS / SCHOOLS dans les fichiers .dc.html) pour peupler un projet
 -- Supabase fraîchement créé et pouvoir tester l'app enseignant et le
@@ -129,7 +129,7 @@ insert into public.sourates (id, num, name, name_ar) values
 -- ─────────────────────────────────────────────────────────────────────────
 
 insert into public.federations (id, name, name_ar, region) values
-  ('00000000-0000-0000-0000-000000000001', 'OEECI · Madrasa CI', null, 'Côte d''Ivoire');
+  ('00000000-0000-0000-0000-000000000001', 'OEECI · Scolaris', null, 'Côte d''Ivoire');
 
 insert into public.schools (id, federation_id, name, name_ar, region, status, contact_name, contact_phone) values
   ('00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000001', 'Médersa An-Nour', 'مدرسة النور', 'Abidjan · Abobo', 'non_integree', 'Cheikh Ibrahim Koné', '07 00 00 01'),

@@ -17,7 +17,7 @@ export default async function FederationLayout({ children }: { children: React.R
     ? await getAllSchools(supabase)
     : await getSchoolsForFederation(supabase, profile.federation_id!);
 
-  let orgName = "Réseau Madrasa CI · toutes fédérations";
+  let orgName = "Réseau Scolaris · toutes fédérations";
   if (!isSuperAdmin) {
     const federation = await getFederation(supabase, profile.federation_id!);
     if (!federation) redirect("/login");

@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/data/profile";
 import { getFederation } from "@/lib/data/schools";
 import { getAdvocacyData, getSchoolRows } from "@/lib/data/federation";
 import { getT } from "@/lib/i18n/server";
+import { intlTag } from "@/lib/i18n/types";
 import PrintTrigger from "./print-trigger";
 
 export default async function AdvocacyPrintPage() {
@@ -16,7 +17,7 @@ export default async function AdvocacyPrintPage() {
   const federation = profile.federation_id ? await getFederation(supabase, profile.federation_id) : null;
   const [data, schools] = await Promise.all([getAdvocacyData(supabase, t), getSchoolRows(supabase)]);
 
-  const today = new Date().toLocaleDateString(locale === "ar" ? "ar" : "fr-FR", {
+  const today = new Date().toLocaleDateString(intlTag(locale), {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -28,7 +29,7 @@ export default async function AdvocacyPrintPage() {
       <div className="mb-8 flex items-baseline justify-between border-b border-border pb-4">
         <div>
           <div className="font-serif text-2xl font-semibold">
-            {federation?.name ?? t("Réseau Madrasa CI · toutes fédérations")}
+            {federation?.name ?? t("Réseau Scolaris · toutes fédérations")}
           </div>
           <div className="text-sm text-ink-muted">{t("Dossier de plaidoyer · intégration au système national")}</div>
         </div>
