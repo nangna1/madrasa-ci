@@ -13,17 +13,26 @@ const NAV = [
   { href: "/guide", label: "Guide d'utilisation", icon: "?" },
 ];
 
+// Visible uniquement pour super_admin (voir federation/admins/page.tsx, qui
+// redirige tout autre rôle) — un federation_admin ne doit pas savoir que
+// cet écran de gestion des comptes existe, encore moins pouvoir y suspendre
+// un pair.
+const SUPER_ADMIN_NAV = { href: "/federation/admins", label: "Comptes admin", icon: "◆" };
+
 export default function FederationShell({
   orgName,
   integrationRate,
+  isSuperAdmin,
   children,
 }: {
   orgName: string;
   integrationRate: number;
+  isSuperAdmin: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const { t } = useLocale();
+  const nav = isSuperAdmin ? [...NAV, SUPER_ADMIN_NAV] : NAV;
 
   return (
     <div className="flex min-h-screen bg-paper-sunk">
@@ -36,7 +45,7 @@ export default function FederationShell({
         </div>
 
         <nav className="flex flex-col gap-1">
-          {NAV.map((n) => {
+          {nav.map((n) => {
             const active = n.href === "/federation" ? pathname === n.href : pathname.startsWith(n.href);
             return (
               <Link

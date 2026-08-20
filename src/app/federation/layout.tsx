@@ -29,7 +29,7 @@ export default async function FederationLayout({ children }: { children: React.R
     : 0;
 
   return (
-    <FederationShell orgName={orgName} integrationRate={integrationRate}>
+    <FederationShell orgName={orgName} integrationRate={integrationRate} isSuperAdmin={isSuperAdmin}>
       {children}
     </FederationShell>
   );

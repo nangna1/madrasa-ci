@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { SchoolAggregate } from "@/lib/data/federation";
 import { consoleMessagingProvider } from "@/lib/providers/messaging-provider";
+import { createTeacherAccount } from "@/app/actions/teacher-access";
 import { useLocale } from "@/components/locale-provider";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -171,10 +172,14 @@ export default function SchoolsTable({ rows }: { rows: SchoolAggregate[] }) {
             <button
               onClick={() => contact(drawer)}
               disabled={!drawer.contactPhone}
-              className="mt-auto rounded-[11px] border border-green py-3.5 text-center text-[13.5px] font-semibold text-green hover:bg-[#EFF4F0] disabled:opacity-50"
+              className="rounded-[11px] border border-green py-3.5 text-center text-[13.5px] font-semibold text-green hover:bg-[#EFF4F0] disabled:opacity-50"
             >
               {t("Contacter le responsable")}
             </button>
+
+            <div className="mt-auto border-t border-border-soft pt-4">
+              <CreateTeacherForm schoolId={drawer.id} />
+            </div>
           </div>
         </div>
       )}
@@ -194,5 +199,106 @@ function DrawerStat({ k, v }: { k: string; v: string }) {
       <div className="text-[10.5px] uppercase tracking-[0.1em] text-ink-faint">{k}</div>
       <div className="mt-1.5 font-serif text-[22px] font-semibold text-ink">{v}</div>
     </div>
+  );
+}
+
+// Création d'un accès enseignant pour cette école, depuis le tiroir de
+// détail — accessible au federation_admin (RLS limite déjà les écoles
+// visibles ici à sa propre fédération, voir createTeacherAccount) et au
+// super_admin (toutes écoles). Le mot de passe temporaire, comme le code
+// élève ailleurs dans l'app, ne s'affiche qu'une seule fois.
+function CreateTeacherForm({ schoolId }: { schoolId: string }) {
+  const { t } = useLocale();
+  const [open, setOpen] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ email: string; password: string } | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    const res = await createTeacherAccount({ schoolId, fullName, email, phone: phone || undefined });
+    setLoading(false);
+    if ("error" in res) {
+      setError(res.error);
+      return;
+    }
+    setResult(res);
+    setFullName("");
+    setEmail("");
+    setPhone("");
+  }
+
+  if (result) {
+    return (
+      <div className="rounded-[11px] border border-dashed border-green bg-[#F2F7F3] p-3.5 text-[13px]">
+        <div className="text-[11px] text-ink-muted">{t("Compte enseignant créé — identifiants affichés une seule fois")}</div>
+        <div className="mt-1.5 font-semibold text-ink">{result.email}</div>
+        <div dir="ltr" className="font-serif text-lg font-semibold tracking-[0.06em] text-ink">
+          {result.password}
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setResult(null);
+            setOpen(false);
+          }}
+          className="mt-2 text-xs font-semibold text-green hover:underline"
+        >
+          {t("Fermer")}
+        </button>
+      </div>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="w-full rounded-[11px] border border-border-input py-3 text-[13.5px] font-semibold text-ink-soft hover:bg-card-alt">
+        {t("+ Créer un accès enseignant")}
+      </button>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-2.5">
+      <input
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        placeholder={t("Nom complet *")}
+        required
+        className="rounded-[10px] border border-border-input bg-card px-3 py-2.5 text-[13.5px] text-ink outline-none focus:border-green"
+      />
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder={t("E-mail")}
+        required
+        className="rounded-[10px] border border-border-input bg-card px-3 py-2.5 text-[13.5px] text-ink outline-none focus:border-green"
+      />
+      <input
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder={t("Téléphone (ex. 07 48 12 90)")}
+        className="rounded-[10px] border border-border-input bg-card px-3 py-2.5 text-[13.5px] text-ink outline-none focus:border-green"
+      />
+      {error && <div className="text-xs text-terracotta">{error}</div>}
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 rounded-[10px] bg-green py-2.5 text-[13px] font-semibold text-card-alt hover:bg-green-dark disabled:opacity-60"
+        >
+          {loading ? t("Création…") : t("Créer l'accès")}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="rounded-[10px] border border-border-input px-3 text-[13px] text-ink-muted">
+          {t("Annuler")}
+        </button>
+      </div>
+    </form>
   );
 }

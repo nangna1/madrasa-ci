@@ -214,6 +214,19 @@ export const ar: Record<string, string> = {
   "Régénérer le code": "تجديد الرمز",
   "Créer un accès élève": "إنشاء وصول للتلميذ",
 
+  // Comptes enseignant (création par admin) et gestion des comptes admin
+  "+ Créer un accès enseignant": "+ إنشاء وصول لمعلّم",
+  "Compte enseignant créé — identifiants affichés une seule fois": "تم إنشاء حساب المعلّم — تُعرض بيانات الدخول مرة واحدة فقط",
+  "Téléphone (ex. 07 48 12 90)": "الهاتف (مثال: 07 48 12 90)",
+  "Créer l'accès": "إنشاء الوصول",
+  "Comptes admin": "حسابات المسؤولين",
+  "Comptes federation_admin du réseau — suspension réversible en cas de besoin":
+    "حسابات مسؤولي الاتحادات في الشبكة — تعليق قابل للإلغاء عند الحاجة",
+  "Suspendu": "موقوف",
+  "Réactiver": "إعادة التفعيل",
+  "Suspendre": "تعليق",
+  "Aucun compte admin pour l'instant.": "لا يوجد أي حساب مسؤول حالياً.",
+
   // Cours en direct
   "Cours en direct": "الدرس المباشر",
   "pas de créneau aujourd'hui": "لا حصة اليوم",

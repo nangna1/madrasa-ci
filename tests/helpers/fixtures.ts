@@ -22,7 +22,7 @@ export function adminClient(): SupabaseClient {
 // essai d'écriture dans un storage navigateur inexistant sous Node), donc les
 // requêtes .from(...) suivantes sur ce client portent bien le JWT de CET
 // utilisateur précis.
-function anonClient(): SupabaseClient {
+export function anonClient(): SupabaseClient {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

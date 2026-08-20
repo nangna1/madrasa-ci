@@ -54,6 +54,7 @@ export interface Database {
           school_id: string | null;
           federation_id: string | null;
           student_id: string | null;
+          suspended: boolean;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {

@@ -216,6 +216,19 @@ export const en: Record<string, string> = {
   "Régénérer le code": "Regenerate the code",
   "Créer un accès élève": "Create a student access",
 
+  // Comptes enseignant (création par admin) et gestion des comptes admin
+  "+ Créer un accès enseignant": "+ Create a teacher access",
+  "Compte enseignant créé — identifiants affichés une seule fois": "Teacher account created — credentials shown only once",
+  "Téléphone (ex. 07 48 12 90)": "Phone (e.g. 07 48 12 90)",
+  "Créer l'accès": "Create access",
+  "Comptes admin": "Admin accounts",
+  "Comptes federation_admin du réseau — suspension réversible en cas de besoin":
+    "Network federation_admin accounts — reversible suspension if needed",
+  "Suspendu": "Suspended",
+  "Réactiver": "Reactivate",
+  "Suspendre": "Suspend",
+  "Aucun compte admin pour l'instant.": "No admin account yet.",
+
   // Cours en direct
   "Cours en direct": "Live class",
   "pas de créneau aujourd'hui": "no slot today",
