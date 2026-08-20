@@ -234,6 +234,33 @@ L'app enseignant est une PWA installable (`public/manifest.json`, scope
   imprimable (`/print/plaidoyer`) et l'impression navigateur (Ctrl+P →
   Enregistrer en PDF), plutôt qu'une génération de PDF côté serveur.
 
+## Tests
+
+```bash
+npm test
+```
+
+Suite Vitest (`tests/`) exécutée en intégration réelle contre le projet
+Supabase de dev configuré dans `.env.local` — pas de mock, pas de stack
+Supabase locale. Couvre aujourd'hui les zones les plus sensibles :
+
+- `tests/rls/tenant-isolation.test.ts` — les frontières RLS réellement en
+  vigueur : un enseignant ne voit que les élèves de **sa classe** (pas toute
+  son école — voir `0002_classes.sql`), un admin fédération est en lecture
+  seule et scopé à sa propre fédération, un compte élève ne voit que sa
+  propre fiche et n'écrit jamais nulle part.
+- `tests/lib/payments.test.ts` — le cycle demande → confirmation d'un
+  paiement mobile money (statuts `pending`/`paid`, upsert par période,
+  numérotation des reçus).
+- `tests/lib/student-code.test.ts` — génération du code d'accès élève
+  (alphabet sans caractères ambigus, unicité pratique) et construction de
+  l'e-mail interne associé.
+
+Chaque fichier crée ses propres fédérations/écoles/classes/comptes
+préfixés `TEST_`, et les supprime intégralement à la fin (voir
+`tests/helpers/fixtures.ts`) — sans danger pour les vraies données du
+projet Supabase partagé.
+
 ## Structure
 
 - `src/lib/data/` — couche d'accès aux données (une fonction typée par
