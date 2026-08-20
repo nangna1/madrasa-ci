@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/lib/supabase/types";
 import { getQueue, removeFromQueue } from "./queue";
 import { markAttendance } from "@/lib/data/attendance";
@@ -41,7 +42,14 @@ export async function flushQueue(
       }
       await removeFromQueue(action.id);
       synced++;
-    } catch {
+    } catch (err) {
+      // Ce flush n'est appelé qu'au retour en ligne (voir offline-context.tsx)
+      // : un échec ici n'est donc plus un simple "pas de réseau" mais
+      // potentiellement un vrai bug (RLS, contrainte en base, etc.) — sans ce
+      // log, l'action restait juste bloquée en file indéfiniment, sans aucune
+      // piste pour comprendre pourquoi.
+      console.error("offline sync: échec sur une action en file", action.kind, err);
+      Sentry.captureException(err, { extra: { actionKind: action.kind, actionId: action.id } });
       failed++;
     }
   }
